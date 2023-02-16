@@ -5,22 +5,20 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
 @Data
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class Role {
+public class LookupValue {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    private Long codeType;
-    private String codeValue;
-    private String codeName;
+    private Long lookupValueId;
+    private Long lookupValueType;
+    @Column(unique = true)
+    private String lookupValueCode;
+    private String lookupValue;
 }

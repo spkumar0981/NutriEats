@@ -17,7 +17,5 @@ public class UpdateUserRequest {
     private String password;
 
     private String phoneNumber;
-    private String cadre;
-    private String branch;
 
 }

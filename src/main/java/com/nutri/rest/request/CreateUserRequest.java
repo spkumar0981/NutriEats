@@ -1,9 +1,6 @@
 package com.nutri.rest.request;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.validation.constraints.Email;
 
@@ -12,14 +9,19 @@ import javax.validation.constraints.Email;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateUserRequest {
+    @NonNull
     private String firstName;
+    @NonNull
     private String lastName;
+    @NonNull
     @Email
-    private String email;
-
-    private String password;
-
     private String userName;
 
+    @NonNull
+    private String userType;
+
+    @NonNull
+    private String password;
+    @NonNull
     private String phoneNumber;
 }

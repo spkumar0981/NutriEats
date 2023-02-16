@@ -18,7 +18,7 @@ import java.util.Date;
 public class LogoutTokens extends AuditableEntity<String> {
     @Id
     private String token;
-    private String username;
+    private String userName;
     private Date tokenExpiryTime;
     
 }

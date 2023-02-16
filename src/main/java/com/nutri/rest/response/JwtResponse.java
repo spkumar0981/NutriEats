@@ -15,9 +15,7 @@ public class JwtResponse {
     private String token;
     private String type = "Bearer";
     private String id;
-    private String username;
-    private String email;
+    private String userName;
 
-    public JwtResponse(String jwt, String id, String username, String email, List<String> roles) {
-    }
+    private String role;
 }

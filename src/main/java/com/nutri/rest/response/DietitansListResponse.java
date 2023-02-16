@@ -11,13 +11,16 @@ import java.math.BigDecimal;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserResponse {
+public class DietitansListResponse {
 
     private String firstName;
     private String lastName;
     private String userName;
     private String phoneNumber;
-
     private BigDecimal price;
+    private String status;
+
+    private String customerInput;
+    private String dietitianInput;
 
 }

@@ -8,7 +8,10 @@ import javax.validation.constraints.NotEmpty;
 public class LoginRequest {
 
     @NotEmpty(message = "Username is mandatory")
-    private String username;
+    private String userName;
+
+    @NotEmpty(message = "Type of user is mandatory")
+    private String userType;
 
     @NotEmpty(message = "password is mandatory")
     private String password;

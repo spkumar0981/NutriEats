@@ -13,7 +13,7 @@ public class AuditLoggingMapper {
         return AuditLogging.builder()
                 .ip(ip)
                 .loginTime(new Date())
-                .userName(loginRequest.getUsername())
+                .userName(loginRequest.getUserName())
                 .token(token).build();
     }
 }

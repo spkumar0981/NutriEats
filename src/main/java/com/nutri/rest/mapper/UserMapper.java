@@ -17,8 +17,8 @@ public class UserMapper {
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .userName(user.getUserName())
-                .email(user.getEmail())
                 .phoneNumber(user.getPhoneNumber())
+                .price(user.getBasePrice())
                 .build();
     }
 
@@ -28,7 +28,6 @@ public class UserMapper {
                 .firstName(createUserRequest.getFirstName())
                 .lastName(createUserRequest.getLastName())
                 .userName(createUserRequest.getUserName())
-                .email(createUserRequest.getEmail())
                 .password(encryptedPassword)
                 .phoneNumber(createUserRequest.getPhoneNumber())
                 .passwordUpdateDate(LocalDate.now())
@@ -41,7 +40,6 @@ public class UserMapper {
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .userName(user.getUserName())
-                .email(user.getEmail())
                 .phoneNumber(user.getPhoneNumber())
                 .build();
     }

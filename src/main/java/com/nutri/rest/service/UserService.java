@@ -4,17 +4,12 @@ import com.nutri.rest.exception.EntityNotFoundException;
 import com.nutri.rest.exception.ValidationException;
 import com.nutri.rest.mapper.AuditLoggingMapper;
 import com.nutri.rest.mapper.UserMapper;
-import com.nutri.rest.model.AuditLogging;
-import com.nutri.rest.model.LogoutTokens;
-import com.nutri.rest.model.OTP;
-import com.nutri.rest.model.User;
+import com.nutri.rest.model.*;
 import com.nutri.rest.repository.AuditLoggingRepository;
 import com.nutri.rest.repository.LogoutTokensRepository;
+import com.nutri.rest.repository.RoleRepository;
 import com.nutri.rest.repository.UserRepository;
-import com.nutri.rest.request.CreateUserRequest;
-import com.nutri.rest.request.LoginRequest;
-import com.nutri.rest.request.UpdateUserPwdRequest;
-import com.nutri.rest.request.UpdateUserRequest;
+import com.nutri.rest.request.*;
 import com.nutri.rest.response.CaptchaResponse;
 import com.nutri.rest.response.JwtResponse;
 import com.nutri.rest.response.ResetPasswordResponse;
@@ -22,6 +17,7 @@ import com.nutri.rest.response.UserResponse;
 import com.nutri.rest.security.JwtUtils;
 import com.nutri.rest.security.SSOUser;
 import com.nutri.rest.utils.AppUtils;
+import com.nutri.rest.utils.UserRoles;
 import io.jsonwebtoken.Jwts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +34,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -61,6 +58,7 @@ public class UserService implements UserDetailsService {
   private final AuditLoggingRepository auditLoggingRepository;
   private final MailService mailService;
   private final OTPService otpService;
+  private final RoleRepository roleRepository;
 
   @Value("${bezkoder.app.jwtSecret}")
   private String jwtSecret;
@@ -71,7 +69,7 @@ public class UserService implements UserDetailsService {
           UserRepository userRepository,
           AuthenticationManager authenticationManager,
           JwtUtils jwtUtils,
-          LogoutTokensRepository logoutTokensRepository, AuditLoggingRepository auditLoggingRepository, MailService mailService, OTPService otpService) {
+          LogoutTokensRepository logoutTokensRepository, AuditLoggingRepository auditLoggingRepository, MailService mailService, OTPService otpService, RoleRepository roleRepository) {
     this.userRepository = userRepository;
     this.authenticationManager = authenticationManager;
     this.jwtUtils = jwtUtils;
@@ -79,6 +77,7 @@ public class UserService implements UserDetailsService {
     this.auditLoggingRepository = auditLoggingRepository;
     this.mailService = mailService;
     this.otpService = otpService;
+    this.roleRepository = roleRepository;
   }
 
   public JwtResponse authenticateUser(LoginRequest loginRequest, HttpServletRequest request) {
@@ -91,7 +90,7 @@ public class UserService implements UserDetailsService {
     if (!captchaVerified)
       throw new ValidationException("Invalid Captcha");*/
 
-    Optional<User> userDetails = userRepository.findByUserName(loginRequest.getUsername());
+    Optional<User> userDetails = userRepository.findByUserName(loginRequest.getUserName());
     if(userDetails.isPresent() && userDetails.get().getInvalidAttempts()>5) {
       if(this.checkTimeToUnlockUser(userDetails.get().getLastModifiedDate())) {
         User user = userDetails.get();
@@ -109,7 +108,7 @@ public class UserService implements UserDetailsService {
     }
 
     Authentication authentication = new UsernamePasswordAuthenticationToken(
-            loginRequest.getUsername(), loginRequest.getPassword());
+            loginRequest.getUserName(), loginRequest.getPassword());
     try {
       authentication =
               authenticationManager.authenticate(authentication);
@@ -127,7 +126,7 @@ public class UserService implements UserDetailsService {
 
 
     SSOUser user = (SSOUser) authentication.getPrincipal();
-    List<AuditLogging> auditLoggings = this.auditLoggingRepository.findByUserNameAndLogoutTimeIsNull(loginRequest.getUsername());
+    List<AuditLogging> auditLoggings = this.auditLoggingRepository.findByUserNameAndLogoutTimeIsNull(loginRequest.getUserName());
     if(!(auditLoggings.isEmpty())) {
       for (AuditLogging auditLogging : auditLoggings) {
 //        this.invalidateToken(auditLogging.getToken());
@@ -137,7 +136,7 @@ public class UserService implements UserDetailsService {
         this.logoutTokensRepository.save(LogoutTokens.builder()
                 .token(auditLogging.getToken())
                 .tokenExpiryTime(new Date())
-                .username(loginRequest.getUsername()).build());
+                .userName(loginRequest.getUserName()).build());
       }
     }
     this.auditLoggingRepository.save(AuditLoggingMapper.mapAuditLogging(loginRequest, jwt, request.getRemoteAddr()));
@@ -146,8 +145,8 @@ public class UserService implements UserDetailsService {
     return JwtResponse.builder()
         .token(jwt)
         .id(user.getId())
-        .username(user.getUsername())
-        .email(user.getEmail())
+        .userName(user.getUsername())
+        .role(((List)user.getAuthorities()).get(0).toString())
         .build();
   }
 
@@ -207,7 +206,7 @@ public class UserService implements UserDetailsService {
     this.logoutTokensRepository.save(LogoutTokens.builder()
             .token(token)
             .tokenExpiryTime(tokenExpiryTime)
-            .username(username).build());
+            .userName(username).build());
   }
 
   public UserResponse getUser(String userName) {
@@ -250,10 +249,14 @@ public class UserService implements UserDetailsService {
     String encryptedPassword =
         new BCryptPasswordEncoder(4, new SecureRandom(jwtSecret.getBytes()))
             .encode(createUserRequest.getPassword());
+    User user = UserMapper.mapFromUserRequestToDomain(
+            encryptedPassword, createUserRequest);
+    if (!StringUtils.isEmpty(createUserRequest.getUserType())) {
+      List<Role> roles = roleRepository.findByCodeValue(createUserRequest.getUserType());
+      user.setRoles(roles);
+    }
     return UserMapper.mapFromUserDomainToResponse(
-        userRepository.save(
-            UserMapper.mapFromUserRequestToDomain(
-                encryptedPassword, createUserRequest)));
+        userRepository.save(user));
   }
 
   public UserResponse updateUser(String userName, UpdateUserRequest updateUserRequest) throws IOException {
@@ -262,9 +265,6 @@ public class UserService implements UserDetailsService {
             .findByUserName(userName)
             .orElseThrow(
                 () -> new EntityNotFoundException("User Not Found with username: " + userName));
-    if (updateUserRequest.getEmail() != null) {
-      user.setEmail(updateUserRequest.getEmail());
-    }
     if (updateUserRequest.getRoles() != null && updateUserRequest.getRoles().size() > 0) {
       user.setRoles(updateUserRequest.getRoles());
     }
@@ -321,7 +321,7 @@ public class UserService implements UserDetailsService {
                 () -> new EntityNotFoundException("User Not Found with username: " + userName));
     String token = jwtUtils.generateJwtToken(userName);
     return ResetPasswordResponse.builder()
-        .response(mailService.sendResetMail(user.getEmail(), token))
+        .response(mailService.sendResetMail(user.getUserName(), token))
         .build();
   }
 

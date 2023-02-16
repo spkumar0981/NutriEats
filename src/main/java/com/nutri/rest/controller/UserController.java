@@ -1,16 +1,16 @@
 package com.nutri.rest.controller;
 
 import com.nutri.rest.request.*;
-import com.nutri.rest.response.CaptchaResponse;
-import com.nutri.rest.response.JwtResponse;
-import com.nutri.rest.response.ResetPasswordResponse;
-import com.nutri.rest.response.UserResponse;
+import com.nutri.rest.response.*;
 import com.nutri.rest.service.CurrentUserService;
+import com.nutri.rest.service.SubscriptionService;
 import com.nutri.rest.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -28,8 +28,11 @@ public class UserController {
 
   private final UserService userService;
 
-  public UserController(UserService userService) {
+  private final SubscriptionService subscriptionService;
+
+  public UserController(UserService userService, SubscriptionService subscriptionService) {
     this.userService = userService;
+    this.subscriptionService = subscriptionService;
   }
 
 
@@ -75,9 +78,8 @@ public class UserController {
     return;
   }
 
-  @PostMapping
+  @PostMapping("/createUser")
   @ApiOperation(value = "Create User")
-  @PreAuthorize("hasRole('ROLE_ADMIN')")
   public UserResponse create(@Validated @RequestBody CreateUserRequest createUserRequest) {
     return userService.createUser(createUserRequest);
   }
@@ -109,19 +111,19 @@ public class UserController {
   @PostMapping("/resetPassword/request")
   @ApiOperation(value = "Password reset request")
   public ResetPasswordResponse resetPasswordRequest(ResetPasswordRequest resetPasswordRequest) {
-    return userService.resetPasswordRequest(resetPasswordRequest.getUsername());
+    return userService.resetPasswordRequest(resetPasswordRequest.getUserName());
   }
 
   @PostMapping("/resetPassword/otp/request")
   @ApiOperation(value = "Password reset request")
   public ResetPasswordResponse otpResetPasswordRequest(@Valid @RequestBody ResetPasswordRequest resetPasswordRequest) {
-    return userService.otpResetPasswordRequest(resetPasswordRequest.getUsername());
+    return userService.otpResetPasswordRequest(resetPasswordRequest.getUserName());
   }
 
   @PostMapping("/resetPassword/otp/validate")
   @ApiOperation(value = "Password reset request")
   public ResetPasswordResponse otpResetPasswordValidate(@Valid @RequestBody ValidateOTPRequest validateOTPRequest) {
-    return userService.validateOTP(validateOTPRequest.getUsername(),validateOTPRequest.getOtp());
+    return userService.validateOTP(validateOTPRequest.getUserName(),validateOTPRequest.getOtp());
   }
 
   @GetMapping("/encryptPassword")
@@ -134,5 +136,18 @@ public class UserController {
   @ApiOperation(value = "Generate Captcha")
   public CaptchaResponse generateCaptcha(){
     return userService.generateCaptcha();
+  }
+
+  @GetMapping("/dietitians")
+  @ApiOperation(value = "Get all users")
+  public Page<DietitansListResponse> getAllUsersByRole(Pageable pageable){
+    return subscriptionService.getAllDietitians(pageable);
+  }
+
+  @PostMapping("/hireDietitian")
+  @ApiOperation(value = "Hire a Dietitian")
+  public ResponseEntity<Object> hireDietitian(@Valid @RequestBody DietitianRequest dietitianRequest){
+    subscriptionService.hireDietitian(dietitianRequest);
+    return new ResponseEntity<>("Dietitian hired successfully", HttpStatus.OK);
   }
 }
