@@ -67,15 +67,14 @@ public class SubscriptionService {
 
     public Page<CustomerListResponse> getAllNewCustomersForADietitian(Pageable pageable) {
         User dietitian = getCurrentLoggedUserDetails();
-        return userRepository.getAllNewCustomersForADietitian(dietitian.getUserName(), SubscriptionStatus.SUBSCRIPTION_STATUS_1.name(), pageable)
+        return userRepository.getAllNewCustomersForADietitian(dietitian.getUserName(), SubscriptionStatus.SUBSCRIPTION_STATUS_1.name(), SubscriptionStatus.SUBSCRIPTION_STATUS_3.name(), pageable)
                 .map(CustomerMapper::mapCustomerDetailsFromObjArray);
     }
 
     public Page<DietitianListResponse> getAllHiredDietitiansOfACustomer(Pageable pageable) {
         User customer = getCurrentLoggedUserDetails();
         return userRepository.getAllHiredDietitiansOfCustomer(customer.getUserName(), pageable).map(
-                DietitianMapper::mapDietitianDetailsFromObjArray
-        );
+                DietitianMapper::mapDietitianDetailsFromObjArray);
     }
 
     public String sendMessageToCustomer(DietitianRequest customerRequest) {
@@ -102,9 +101,42 @@ public class SubscriptionService {
         return "Dietitian hired successfully";
     }
 
-    public List<ItemResponse> getItemsForASubscription(String customerName){
+    public String confirmDietitianMenu(DietitianRequest dietitianRequest) {
+        User customer = getCurrentLoggedUserDetails();
+        User dietitian = userRepository.findByUserName(dietitianRequest.getUserName()).get();
+        LookupValue subscribedStatus = lookupRepository.findByLookupValueCode(SubscriptionStatus.SUBSCRIPTION_STATUS_4.name());
+        Subscription subscription = subscriptionRepository.findByCustomerIdAndDietitianId(customer, dietitian);
+        subscription.setCustomerInput(dietitianRequest.getCustomerInput());
+        subscription.setStatus(subscribedStatus);
+        subscriptionRepository.save(subscription);
+        return "Menu Confirmed successfully";
+    }
+
+    public String rejectDietitianMenu(DietitianRequest dietitianRequest) {
+        User customer = getCurrentLoggedUserDetails();
+        User dietitian = userRepository.findByUserName(dietitianRequest.getUserName()).get();
+        LookupValue subscribedStatus = lookupRepository.findByLookupValueCode(SubscriptionStatus.SUBSCRIPTION_STATUS_3.name());
+        Subscription subscription = subscriptionRepository.findByCustomerIdAndDietitianId(customer, dietitian);
+        subscription.setCustomerInput(dietitianRequest.getCustomerInput());
+        subscription.setStatus(subscribedStatus);
+        subscriptionRepository.save(subscription);
+        return "Menu Rejected successfully";
+    }
+
+    public List<ItemResponse> getItemsForASubscriptionForCustomer(String customerName){
         User dietitian = getCurrentLoggedUserDetails();
         User customer = userRepository.findByUserName(customerName).get();
+        Subscription subscription = subscriptionRepository.findByCustomerIdAndDietitianId(customer, dietitian);
+        List<MenuItem> menuItems = menuItemRepository.findBySubscriptionId(subscription);
+        if(CollectionUtils.isEmpty(menuItems)){
+            return new ArrayList<>();
+        }
+        return menuItems.stream().map(ItemMapper::mapToItems).collect(Collectors.toList());
+    }
+
+    public List<ItemResponse> getItemsForASubscriptionForDietitian(String dietitianName){
+        User customer = getCurrentLoggedUserDetails();
+        User dietitian = userRepository.findByUserName(dietitianName).get();
         Subscription subscription = subscriptionRepository.findByCustomerIdAndDietitianId(customer, dietitian);
         List<MenuItem> menuItems = menuItemRepository.findBySubscriptionId(subscription);
         if(CollectionUtils.isEmpty(menuItems)){

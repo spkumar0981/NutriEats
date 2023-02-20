@@ -26,23 +26,29 @@ public class ItemController {
         this.itemService = itemService;
     }
 
-    @GetMapping("/dietitian/customer/items/{customerName}")
+    @GetMapping("/dietitian/customer/{customerName}")
     @ApiOperation(value = "Get items for a subscription")
-    public ResponseEntity<Object> getItemsForASubscription(@PathVariable String customerName){
-        return new ResponseEntity<>(subscriptionService.getItemsForASubscription(customerName), HttpStatus.OK);
+    public ResponseEntity<Object> getItemsForASubscriptionForACustomer(@PathVariable String customerName){
+        return new ResponseEntity<>(subscriptionService.getItemsForASubscriptionForCustomer(customerName), HttpStatus.OK);
     }
 
-    @PostMapping("/dietitian/customer/items/{customerName}")
+    @PostMapping("/dietitian/customer/{customerName}")
     @ApiOperation(value = "Add or update item to a subscription")
     public ItemResponse addOrUpdateItemToASubscription(@PathVariable String customerName, @RequestBody ItemRequest itemRequest){
         return subscriptionService.addOrUpdateItemToSubscription(customerName, itemRequest);
     }
 
-    @DeleteMapping("/dietitian/customer/items/{customerName}/{itemName}")
+    @DeleteMapping("/dietitian/customer/{customerName}/{itemName}")
     @ApiOperation(value = "Delete item in a subscription")
     public ResponseEntity<Object> deleteItemInASubscription(@PathVariable String customerName, @PathVariable String itemName){
         subscriptionService.deleteItemInSubscription(customerName, itemName);
         return new ResponseEntity<>("Item deleted successfully", HttpStatus.OK);
+    }
+
+    @GetMapping("/customer/dietitian/{dietitianName}")
+    @ApiOperation(value = "Get items for a subscription")
+    public ResponseEntity<Object> getItemsForASubscriptionForADietitian(@PathVariable String dietitianName){
+        return new ResponseEntity<>(subscriptionService.getItemsForASubscriptionForDietitian(dietitianName), HttpStatus.OK);
     }
 
     @GetMapping

@@ -43,4 +43,18 @@ public class CustomerController {
         subscriptionService.hireDietitian(dietitianRequest);
         return new ResponseEntity<>("Dietitian hired successfully", HttpStatus.OK);
     }
+
+    @PostMapping("/confirmmenu")
+    @ApiOperation(value = "Confirm a Dietitian's Menu")
+    public ResponseEntity<Object> confirmDietitianMenu(@Valid @RequestBody DietitianRequest dietitianRequest){
+        subscriptionService.confirmDietitianMenu(dietitianRequest);
+        return new ResponseEntity<>("Menu confirmed successfully", HttpStatus.OK);
+    }
+
+    @PostMapping("/rejectmenu")
+    @ApiOperation(value = "Confirm a Dietitian's Menu")
+    public ResponseEntity<Object> rejectDietitianMenu(@Valid @RequestBody DietitianRequest dietitianRequest){
+        subscriptionService.rejectDietitianMenu(dietitianRequest);
+        return new ResponseEntity<>("Menu rejected successfully", HttpStatus.OK);
+    }
 }
