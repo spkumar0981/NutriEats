@@ -1,14 +1,12 @@
 package com.nutri.rest.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import javax.persistence.*;
 
 @Entity
 @Data
+@Builder
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor

@@ -137,17 +137,4 @@ public class UserController {
   public CaptchaResponse generateCaptcha(){
     return userService.generateCaptcha();
   }
-
-  @GetMapping("/dietitians")
-  @ApiOperation(value = "Get all users")
-  public Page<DietitansListResponse> getAllUsersByRole(Pageable pageable){
-    return subscriptionService.getAllDietitians(pageable);
-  }
-
-  @PostMapping("/hireDietitian")
-  @ApiOperation(value = "Hire a Dietitian")
-  public ResponseEntity<Object> hireDietitian(@Valid @RequestBody DietitianRequest dietitianRequest){
-    subscriptionService.hireDietitian(dietitianRequest);
-    return new ResponseEntity<>("Dietitian hired successfully", HttpStatus.OK);
-  }
 }

@@ -17,7 +17,6 @@ import com.nutri.rest.response.UserResponse;
 import com.nutri.rest.security.JwtUtils;
 import com.nutri.rest.security.SSOUser;
 import com.nutri.rest.utils.AppUtils;
-import com.nutri.rest.utils.UserRoles;
 import io.jsonwebtoken.Jwts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +43,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 @Service
@@ -118,14 +118,19 @@ public class UserService implements UserDetailsService {
         user.setInvalidAttempts(user.getInvalidAttempts() + 1);
         userRepository.save(user);
       }
-      throw new ValidationException("Invalid username/password");
+      throw new ValidationException("The username or password is invalid");
     }
+    SSOUser user = (SSOUser) authentication.getPrincipal();
+    AtomicBoolean userTypeExists = new AtomicBoolean(false);
+    user.getAuthorities().stream().forEach(grantedAuthority -> {
+      if(grantedAuthority.getAuthority().equals(loginRequest.getUserType()))
+        userTypeExists.set(true);
+    });
+    if(!userTypeExists.get())
+      throw new ValidationException("Invalid Type of user selected");
 
     SecurityContextHolder.getContext().setAuthentication(authentication);
     String jwt = jwtUtils.generateJwtToken(authentication);
-
-
-    SSOUser user = (SSOUser) authentication.getPrincipal();
     List<AuditLogging> auditLoggings = this.auditLoggingRepository.findByUserNameAndLogoutTimeIsNull(loginRequest.getUserName());
     if(!(auditLoggings.isEmpty())) {
       for (AuditLogging auditLogging : auditLoggings) {

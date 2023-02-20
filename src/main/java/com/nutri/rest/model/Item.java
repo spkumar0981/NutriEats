@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import javax.persistence.*;
+import java.util.Collection;
 
 @Entity
 @Data
@@ -24,7 +25,6 @@ public class Item {
     @Lob
     private byte[] itemImage;
     private String itemCategory;
-    @ManyToOne
-    @JoinColumn(referencedColumnName = "lookupValueId", name = "itemUnit")
-    private LookupValue itemUnit;
+
+    private Long lookupValueTypeOfItemUnit;
 }

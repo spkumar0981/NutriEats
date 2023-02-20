@@ -3,30 +3,38 @@ package com.nutri.rest.mapper;
 import com.nutri.rest.model.Subscription;
 import com.nutri.rest.model.User;
 import com.nutri.rest.response.CustomerListResponse;
-import com.nutri.rest.response.DietitianListResponse;
 import lombok.experimental.UtilityClass;
 
 import static com.nutri.rest.utils.AppUtils.castObjectToString;
 
 @UtilityClass
-public class DietitianMapper {
-    public DietitianListResponse mapFromUserDomainToResponse(User user, Subscription subscription){
-        return DietitianListResponse
+public class CustomerMapper {
+    public CustomerListResponse mapFromUserDomainToResponse(User user, Subscription subscription){
+        return CustomerListResponse
                 .builder()
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .userName(user.getUserName())
                 .phoneNumber(user.getPhoneNumber())
-                .price(user.getBasePrice())
                 .status(subscription!=null?subscription.getStatus().getLookupValueCode():"")
                 .customerInput(subscription!=null?subscription.getCustomerInput():"")
                 .dietitianInput(subscription!=null?subscription.getDietitianInput():"")
                 .build();
     }
 
-    public DietitianListResponse mapDietitianDetailsFromObjArray(Object[] user){
+    public CustomerListResponse mapCustomerDetails(User user){
+        return CustomerListResponse
+                .builder()
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .userName(user.getUserName())
+                .phoneNumber(user.getPhoneNumber())
+                .build();
+    }
 
-        return DietitianListResponse
+    public CustomerListResponse mapCustomerDetailsFromObjArray(Object[] user){
+
+        return CustomerListResponse
                 .builder()
                 .firstName(castObjectToString(user[0]))
                 .lastName(castObjectToString(user[1]))
@@ -37,4 +45,6 @@ public class DietitianMapper {
                 .dietitianInput(castObjectToString(user[6]))
                 .build();
     }
+
+
 }

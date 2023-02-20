@@ -1,6 +1,7 @@
 package com.nutri.rest.utils;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class AppUtils {
@@ -59,4 +60,32 @@ public class AppUtils {
     };
 
     public static final String PAGABLE = " \n-- #pageable\n";
+
+    public static Long castObjectToLong(Object field) {
+        if (field == null)
+            return null;
+        else
+            return new Long(field.toString());
+    }
+
+    public static String castObjectToString(Object field) {
+        if (field == null)
+            return null;
+        else
+            return field.toString();
+    }
+
+    public static String[] castObjectToStringArray(Object field) {
+        if (field == null)
+            return null;
+        else
+            return field.toString().split(";");
+    }
+
+    public static Boolean castObjectToBoolean(Object field) {
+        if (field == null)
+            return null;
+        else
+            return Boolean.valueOf(field.toString());
+    }
 }

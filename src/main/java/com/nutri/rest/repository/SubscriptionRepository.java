@@ -10,8 +10,11 @@ import org.springframework.data.jpa.repository.Query;
 public interface SubscriptionRepository extends JpaRepository<Subscription, Long> {
 
     Subscription findByCustomerIdAndDietitianId(User customerId, User dietitianId);
+    Subscription findByCustomerId(User customerId);
+    Subscription findByDietitianId(User dietitianId);
 
-    @Query(value = "SELECT U.*, (SELECT STATUS) FROM USER U " +
+
+    @Query(value = "SELECT U.*, (SELECT STATUS FROM USER U) " +
             "INNER JOIN USER_ROLE UR ON (UR.USER_ID=U.ID) " +
             "INNER JOIN ROLE R ON (UR.ROLE_ID=R.ID) " +
             "WHERE R.CODE_NAME = ?1",
@@ -20,5 +23,5 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
                     "INNER JOIN ROLE R ON (UR.ROLE_ID=R.ID) " +
                     "WHERE R.CODE_NAME = ?1",
             nativeQuery = true)
-    Page<User> findByUserType(String lastname, Pageable pageable);
+    Page<User> findItemsByCustomerAndDietitian(String lastname, Pageable pageable);
 }

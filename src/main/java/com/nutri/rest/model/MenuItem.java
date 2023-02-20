@@ -1,14 +1,12 @@
 package com.nutri.rest.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import javax.persistence.*;
 
 @Entity
 @Data
+@Builder
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
@@ -29,4 +27,7 @@ public class MenuItem {
     private Long quantity;
 
     private String isActive;
+    @ManyToOne
+    @JoinColumn(referencedColumnName = "lookupValueId", name = "quantityUnit", nullable = false)
+    private LookupValue quantityUnit;
 }

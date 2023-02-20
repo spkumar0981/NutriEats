@@ -4,6 +4,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Entity
 @Data
@@ -37,5 +38,6 @@ public class Subscription {
 
     private String customerInput;
     private String dietitianInput;
+    private LocalDate subscriptionExpireDate;
 
 }
