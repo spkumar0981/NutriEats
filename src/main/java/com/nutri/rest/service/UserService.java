@@ -293,6 +293,22 @@ public class UserService implements UserDetailsService {
     return UserMapper.mapFromUserDomainToResponse(userRepository.save(user));
   }
 
+  public UserResponse updateUserProfileRequest(String userName, UpdateUserProfileRequest updateUserProfileRequest){
+    User user = userRepository
+                    .findByUserName(userName)
+                    .orElseThrow(
+                            () -> new EntityNotFoundException("User Not Found with username: " + userName));
+    if (updateUserProfileRequest.getPhoneNumber() != null) {
+      user.setPhoneNumber(updateUserProfileRequest.getPhoneNumber());
+    }
+    if(updateUserProfileRequest.getFirstName() != null)
+      user.setFirstName(updateUserProfileRequest.getFirstName());
+    if(updateUserProfileRequest.getLastName() != null)
+      user.setLastName(updateUserProfileRequest.getLastName());
+
+    return UserMapper.mapFromUserDomainToResponse(userRepository.save(user));
+  }
+
   public UserResponse updatePassword(String userName, UpdateUserPwdRequest updateUserRequest) throws IOException {
 //    String userName = updateUserRequest.getUsername();
     User user =

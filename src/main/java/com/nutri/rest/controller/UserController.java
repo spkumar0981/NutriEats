@@ -94,9 +94,16 @@ public class UserController {
   @PostMapping("/update")
   @ApiOperation(value = "Update user details")
   @PreAuthorize("hasRole('ROLE_ADMIN')")
-  public UserResponse updateProfile(@Valid @RequestBody UpdateUserRequest updateUserRequest) throws IOException {
+  public UserResponse updateProfileByAdmin(@Valid @RequestBody UpdateUserRequest updateUserRequest) throws IOException {
     String loggedUser = CurrentUserService.getLoggedUserName();
     return userService.updateUser(loggedUser, updateUserRequest);
+  }
+
+  @PostMapping("/update/details")
+  @ApiOperation(value = "Update user details")
+  public UserResponse updateProfile(@Valid @RequestBody UpdateUserProfileRequest updateUserProfileRequest) throws IOException {
+    String loggedUser = CurrentUserService.getLoggedUserName();
+    return userService.updateUserProfileRequest(loggedUser, updateUserProfileRequest);
   }
 
 
