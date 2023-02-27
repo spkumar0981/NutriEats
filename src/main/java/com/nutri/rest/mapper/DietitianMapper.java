@@ -19,6 +19,10 @@ public class DietitianMapper {
                 .unitLookupCode(subscription!=null?subscription.getStatus().getLookupValueCode():"")
                 .unitLookupValue(subscription!=null?subscription.getStatus().getLookupValue():"")
                 .build();
+        ItemDetailsResponse.LookupUnits preferredMealOption = ItemDetailsResponse.LookupUnits.builder()
+                .unitLookupCode(subscription!=null?subscription.getPreferredMealOption()!=null?subscription.getPreferredMealOption().getLookupValueCode():"":"")
+                .unitLookupValue(subscription!=null?subscription.getPreferredMealOption()!=null?subscription.getPreferredMealOption().getLookupValue():"":"")
+                .build();
 
         return DietitianListResponse
                 .builder()
@@ -31,6 +35,7 @@ public class DietitianMapper {
                 .status(lookupUnits)
                 .customerInput(subscription!=null?subscription.getCustomerInput():"")
                 .dietitianInput(subscription!=null?subscription.getDietitianInput():"")
+                .preferredMealOption(preferredMealOption)
                 .build();
     }
 
@@ -38,6 +43,11 @@ public class DietitianMapper {
         ItemDetailsResponse.LookupUnits lookupUnits = ItemDetailsResponse.LookupUnits.builder()
                 .unitLookupCode(castObjectToString(user[4]))
                 .unitLookupValue(castObjectToString(user[5]))
+                .build();
+
+        ItemDetailsResponse.LookupUnits preferredMeal = ItemDetailsResponse.LookupUnits.builder()
+                .unitLookupCode(castObjectToString(user[9]))
+                .unitLookupValue(castObjectToString(user[10]))
                 .build();
 
         return DietitianListResponse
@@ -50,6 +60,7 @@ public class DietitianMapper {
                 .customerInput(castObjectToString(user[6]))
                 .dietitianInput(castObjectToString(user[7]))
                 .subscriptionAmount(castObjectToBigDecimal(user[8]))
+                .preferredMealOption(preferredMeal)
                 .build();
     }
 }

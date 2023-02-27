@@ -87,12 +87,14 @@ public class SubscriptionService {
         User customer = getCurrentLoggedUserDetails();
         User dietitian = userRepository.findByUserName(dietitianRequest.getUserName()).get();
         LookupValue subscribedStatus = lookupRepository.findByLookupValueCode(SubscriptionStatus.SUBSCRIPTION_STATUS_1.name());
+        LookupValue preferredMealOption = lookupRepository.findByLookupValueCode(dietitianRequest.getPreferredMealOption().getUnitLookupCode());
         Subscription subscription = Subscription.builder()
                 .customerId(customer)
                 .dietitianId(dietitian)
                 .status(subscribedStatus)
                 .customerInput(dietitianRequest.getCustomerInput())
                 .subscriptionExpireDate(LocalDate.now().plusWeeks(1))
+                .preferredMealOption(preferredMealOption)
                 .build();
         subscriptionRepository.save(subscription);
         return "Dietitian hired successfully";

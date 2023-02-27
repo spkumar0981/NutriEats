@@ -21,6 +21,8 @@ public class CustomerListResponse {
     private ItemDetailsResponse.LookupUnits status;
 
     private BigDecimal subscriptionAmount;
+
+    private ItemDetailsResponse.LookupUnits preferredMealOption;
     private String customerInput;
     private String dietitianInput;
 

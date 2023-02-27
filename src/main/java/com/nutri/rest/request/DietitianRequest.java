@@ -1,5 +1,6 @@
 package com.nutri.rest.request;
 
+import com.nutri.rest.response.ItemDetailsResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,5 +25,7 @@ public class DietitianRequest {
 
     private String customerInput;
     private String dietitianInput;
+
+    private ItemDetailsResponse.LookupUnits preferredMealOption;
 
 }

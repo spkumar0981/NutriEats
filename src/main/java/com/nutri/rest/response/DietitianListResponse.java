@@ -22,6 +22,7 @@ public class DietitianListResponse {
     private BigDecimal subscriptionAmount;
     private BigDecimal price;
     private ItemDetailsResponse.LookupUnits status;
+    private ItemDetailsResponse.LookupUnits preferredMealOption;
 
     private String customerInput;
     private String dietitianInput;

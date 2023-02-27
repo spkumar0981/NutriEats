@@ -34,6 +34,10 @@ public class Subscription {
     @JoinColumn(referencedColumnName = "lookupValueId", name = "status")
     private LookupValue status;
 
+    @ManyToOne
+    @JoinColumn(referencedColumnName = "lookupValueId", name = "preferredMealOption")
+    private LookupValue preferredMealOption;
+
     private BigDecimal amount;
 
     private String customerInput;
