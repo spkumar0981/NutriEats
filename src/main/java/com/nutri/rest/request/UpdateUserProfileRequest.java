@@ -18,4 +18,6 @@ public class UpdateUserProfileRequest {
 
     private String phoneNumber;
 
+    private String price;
+
 }

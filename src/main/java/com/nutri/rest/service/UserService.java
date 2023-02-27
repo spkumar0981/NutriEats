@@ -37,6 +37,7 @@ import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.util.Calendar;
@@ -305,6 +306,8 @@ public class UserService implements UserDetailsService {
       user.setFirstName(updateUserProfileRequest.getFirstName());
     if(updateUserProfileRequest.getLastName() != null)
       user.setLastName(updateUserProfileRequest.getLastName());
+    if(updateUserProfileRequest.getPrice() != null)
+      user.setBasePrice(new BigDecimal(updateUserProfileRequest.getPrice()));
 
     return UserMapper.mapFromUserDomainToResponse(userRepository.save(user));
   }
