@@ -32,17 +32,22 @@ public class ItemController {
         return new ResponseEntity<>(subscriptionService.getItemsForASubscriptionForCustomer(customerName), HttpStatus.OK);
     }
 
+    @GetMapping("/dietitian/customer/{itemName}/unit/lookupValue")
+    @ApiOperation(value = "Get items for a subscription")
+    public ResponseEntity<Object> getItemLookups(@PathVariable String itemName){
+        return new ResponseEntity<>(subscriptionService.getItemUnits(itemName), HttpStatus.OK);
+    }
+
     @PostMapping("/dietitian/customer/{customerName}")
     @ApiOperation(value = "Add or update item to a subscription")
     public ItemResponse addOrUpdateItemToASubscription(@PathVariable String customerName, @RequestBody ItemRequest itemRequest){
         return subscriptionService.addOrUpdateItemToSubscription(customerName, itemRequest);
     }
 
-    @DeleteMapping("/dietitian/customer/{customerName}/{itemName}")
+    @PostMapping("/dietitian/customer/{customerName}/{itemName}")
     @ApiOperation(value = "Delete item in a subscription")
     public ResponseEntity<Object> deleteItemInASubscription(@PathVariable String customerName, @PathVariable String itemName){
-        subscriptionService.deleteItemInSubscription(customerName, itemName);
-        return new ResponseEntity<>("Item deleted successfully", HttpStatus.OK);
+        return new ResponseEntity<>(subscriptionService.deleteItemInSubscription(customerName, itemName), HttpStatus.OK);
     }
 
     @GetMapping("/customer/dietitian/{dietitianName}")

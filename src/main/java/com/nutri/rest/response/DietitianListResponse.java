@@ -18,6 +18,8 @@ public class DietitianListResponse {
     private String lastName;
     private String userName;
     private String phoneNumber;
+
+    private BigDecimal subscriptionAmount;
     private BigDecimal price;
     private ItemDetailsResponse.LookupUnits status;
 

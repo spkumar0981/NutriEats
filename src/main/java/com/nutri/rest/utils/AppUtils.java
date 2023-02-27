@@ -1,5 +1,6 @@
 package com.nutri.rest.utils;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,6 +67,13 @@ public class AppUtils {
             return null;
         else
             return new Long(field.toString());
+    }
+
+    public static BigDecimal castObjectToBigDecimal(Object field) {
+        if (field == null)
+            return null;
+        else
+            return new BigDecimal(field.toString());
     }
 
     public static String castObjectToString(Object field) {

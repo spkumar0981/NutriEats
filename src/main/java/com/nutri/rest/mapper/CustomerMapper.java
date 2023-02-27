@@ -6,7 +6,7 @@ import com.nutri.rest.response.CustomerListResponse;
 import com.nutri.rest.response.ItemDetailsResponse;
 import lombok.experimental.UtilityClass;
 
-import static com.nutri.rest.utils.AppUtils.castObjectToString;
+import static com.nutri.rest.utils.AppUtils.*;
 
 @UtilityClass
 public class CustomerMapper {
@@ -53,6 +53,7 @@ public class CustomerMapper {
                 .status(lookupUnits)
                 .customerInput(castObjectToString(user[6]))
                 .dietitianInput(castObjectToString(user[7]))
+                .subscriptionAmount(castObjectToBigDecimal(user[8]))
                 .build();
     }
 

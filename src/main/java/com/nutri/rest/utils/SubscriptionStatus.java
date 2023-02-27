@@ -5,9 +5,7 @@ public enum SubscriptionStatus {
     SUBSCRIPTION_STATUS_2("Menu Created by Dietitian"),
     SUBSCRIPTION_STATUS_3("Menu Rejected"),
     SUBSCRIPTION_STATUS_4("Menu Confirmed"),
-    SUBSCRIPTION_STATUS_5("Amount Quoted"),
-    SUBSCRIPTION_STATUS_6("Amount Paid"),
-    SUBSCRIPTION_STATUS_7("Ordered");
+    SUBSCRIPTION_STATUS_5("Ordered");
 
     private final String value;
 

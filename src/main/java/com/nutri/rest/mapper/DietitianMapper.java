@@ -7,6 +7,7 @@ import com.nutri.rest.response.DietitianListResponse;
 import com.nutri.rest.response.ItemDetailsResponse;
 import lombok.experimental.UtilityClass;
 
+import static com.nutri.rest.utils.AppUtils.castObjectToBigDecimal;
 import static com.nutri.rest.utils.AppUtils.castObjectToString;
 
 @UtilityClass
@@ -24,6 +25,7 @@ public class DietitianMapper {
                 .userName(user.getUserName())
                 .phoneNumber(user.getPhoneNumber())
                 .price(user.getBasePrice())
+                .subscriptionAmount(subscription.getAmount())
                 .status(lookupUnits)
                 .customerInput(subscription!=null?subscription.getCustomerInput():"")
                 .dietitianInput(subscription!=null?subscription.getDietitianInput():"")
@@ -45,6 +47,7 @@ public class DietitianMapper {
                 .status(lookupUnits)
                 .customerInput(castObjectToString(user[6]))
                 .dietitianInput(castObjectToString(user[7]))
+                .subscriptionAmount(castObjectToBigDecimal(user[8]))
                 .build();
     }
 }

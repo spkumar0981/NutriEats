@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ItemRequest {
 
-    private ItemDetailsResponse itemName;
+    private String itemName;
     private Long quantity;
     private ItemDetailsResponse.LookupUnits quantityUnit;
 

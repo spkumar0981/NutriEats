@@ -7,10 +7,7 @@ import com.nutri.rest.model.*;
 import com.nutri.rest.repository.*;
 import com.nutri.rest.request.DietitianRequest;
 import com.nutri.rest.request.ItemRequest;
-import com.nutri.rest.response.CustomerListResponse;
-import com.nutri.rest.response.DietitianListResponse;
-import com.nutri.rest.response.ItemDetailsResponse;
-import com.nutri.rest.response.ItemResponse;
+import com.nutri.rest.response.*;
 import com.nutri.rest.utils.SubscriptionStatus;
 import com.nutri.rest.utils.UserRoles;
 import org.springframework.data.domain.Page;
@@ -67,7 +64,7 @@ public class SubscriptionService {
 
     public Page<CustomerListResponse> getAllNewCustomersForADietitian(Pageable pageable) {
         User dietitian = getCurrentLoggedUserDetails();
-        return userRepository.getAllNewCustomersForADietitian(dietitian.getUserName(), SubscriptionStatus.SUBSCRIPTION_STATUS_1.name(), SubscriptionStatus.SUBSCRIPTION_STATUS_3.name(), pageable)
+        return userRepository.getAllNewCustomersForADietitian(dietitian.getUserName(), SubscriptionStatus.SUBSCRIPTION_STATUS_1.name(), SubscriptionStatus.SUBSCRIPTION_STATUS_3.name(), SubscriptionStatus.SUBSCRIPTION_STATUS_4.name(), pageable)
                 .map(CustomerMapper::mapCustomerDetailsFromObjArray);
     }
 
@@ -134,6 +131,13 @@ public class SubscriptionService {
         return menuItems.stream().map(ItemMapper::mapToItems).collect(Collectors.toList());
     }
 
+    public List<ItemDetailsResponse.LookupUnits> getItemUnits(String itemName){
+        Item item = itemRepository.findByItemName(itemName);
+        return lookupRepository.findByLookupValueType(item.getLookupValueTypeOfItemUnit()).stream().map(lookupValue -> ItemDetailsResponse.LookupUnits.builder()
+                .unitLookupValue(lookupValue.getLookupValue())
+                .unitLookupCode(lookupValue.getLookupValueCode()).build()).collect(Collectors.toList());
+    }
+
     public List<ItemResponse> getItemsForASubscriptionForDietitian(String dietitianName){
         User customer = getCurrentLoggedUserDetails();
         User dietitian = userRepository.findByUserName(dietitianName).get();
@@ -149,7 +153,7 @@ public class SubscriptionService {
         User dietitian = getCurrentLoggedUserDetails();
         User customer = userRepository.findByUserName(customerName).get();
         Subscription subscription = subscriptionRepository.findByCustomerIdAndDietitianId(customer, dietitian);
-        Item item = itemRepository.findByItemName(itemRequest.getItemName().getItemName());
+        Item item = itemRepository.findByItemName(itemRequest.getItemName());
         LookupValue lookupValue = lookupRepository.findByLookupValueCode(itemRequest.getQuantityUnit().getUnitLookupCode());
         MenuItem menuItem = menuItemRepository.findBySubscriptionIdAndItemId(subscription, item);
         if(menuItem!=null){
@@ -167,19 +171,21 @@ public class SubscriptionService {
         }
         menuItemRepository.save(menuItem);
         return ItemResponse.builder()
-                .itemName(itemRequest.getItemName().getItemName())
+                .itemName(itemRequest.getItemName())
                 .quantityUnit(itemRequest.getQuantityUnit().getUnitLookupValue())
                 .quantity(itemRequest.getQuantity()).build();
     }
 
-    public MenuItem deleteItemInSubscription(String customerName, String itemName){
+    public ResponseText deleteItemInSubscription(String customerName, String itemName){
         User dietitian = getCurrentLoggedUserDetails();
         User customer = userRepository.findByUserName(customerName).get();
         Subscription subscription = subscriptionRepository.findByCustomerIdAndDietitianId(customer, dietitian);
         Item item = itemRepository.findByItemName(itemName);
         MenuItem menuItem = menuItemRepository.findBySubscriptionIdAndItemId(subscription, item);
         menuItem.setIsActive("N");
-        return menuItemRepository.save(menuItem);
+        menuItemRepository.delete(menuItem);
+        return ResponseText.builder()
+                .response("Item deleted successfully").build();
     }
 
     public void confirmMealForASubscription(DietitianRequest customerReq){
@@ -189,6 +195,7 @@ public class SubscriptionService {
         LookupValue lookupValue = lookupRepository.findByLookupValueCode(SUBSCRIPTION_STATUS_2.name());
         subscription.setStatus(lookupValue);
         subscription.setDietitianInput(customerReq.getDietitianInput());
+        subscription.setAmount(customerReq.getSubscriptionAmount());
         subscriptionRepository.save(subscription);
     }
 

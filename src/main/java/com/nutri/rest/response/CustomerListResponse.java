@@ -19,6 +19,8 @@ public class CustomerListResponse {
     private String userName;
     private String phoneNumber;
     private ItemDetailsResponse.LookupUnits status;
+
+    private BigDecimal subscriptionAmount;
     private String customerInput;
     private String dietitianInput;
 
