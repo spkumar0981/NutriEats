@@ -44,6 +44,13 @@ public class CustomerController {
         return new ResponseEntity<>("Dietitian hired successfully", HttpStatus.OK);
     }
 
+    @PostMapping("/msgdietitan")
+    @ApiOperation(value = "Send Message to customer")
+    public ResponseEntity<Object> sendMessageToDietitian(@Valid @RequestBody DietitianRequest dietitianRequest){
+        subscriptionService.sendMessageToDietitian(dietitianRequest);
+        return new ResponseEntity<>("Message sent successfully", HttpStatus.OK);
+    }
+
     @PostMapping("/confirmmenu")
     @ApiOperation(value = "Confirm a Dietitian's Menu")
     public ResponseEntity<Object> confirmDietitianMenu(@Valid @RequestBody DietitianRequest dietitianRequest){

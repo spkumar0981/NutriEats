@@ -13,6 +13,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByUserName(String user);
 
+    Optional<User> findByPhoneNumber(String number);
+
     @Query(value = "SELECT U.* FROM USER U " +
             "INNER JOIN USER_ROLE UR ON (UR.USER_ID=U.ID) " +
             "INNER JOIN ROLE R ON (UR.ROLE_ID=R.ID) " +

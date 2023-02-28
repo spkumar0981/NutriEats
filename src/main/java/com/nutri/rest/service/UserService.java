@@ -255,10 +255,18 @@ public class UserService implements UserDetailsService {
     String encryptedPassword =
         new BCryptPasswordEncoder(4, new SecureRandom(jwtSecret.getBytes()))
             .encode(createUserRequest.getPassword());
+    Optional<User> userPresent = userRepository.findByUserName(createUserRequest.getUserName());
+    if(userPresent.isPresent())
+      throw new ValidationException("Email already registered!! Try with a different mail");
+
+    userPresent = userRepository.findByPhoneNumber(createUserRequest.getPhoneNumber());
+    if(userPresent.isPresent())
+      throw new ValidationException("Mobile Number already used!! Try with a different number");
+
     User user = UserMapper.mapFromUserRequestToDomain(
             encryptedPassword, createUserRequest);
     if (!StringUtils.isEmpty(createUserRequest.getUserType())) {
-      List<Role> roles = roleRepository.findByCodeValue(createUserRequest.getUserType());
+      List<Role> roles = roleRepository.findByCodeName(createUserRequest.getUserType());
       user.setRoles(roles);
     }
     return UserMapper.mapFromUserDomainToResponse(

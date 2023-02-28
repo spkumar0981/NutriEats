@@ -83,6 +83,15 @@ public class SubscriptionService {
         return "Message sent successfully";
     }
 
+    public String sendMessageToDietitian(DietitianRequest dietitianRequest) {
+        User customer = getCurrentLoggedUserDetails();
+        User dietitian = userRepository.findByUserName(dietitianRequest.getUserName()).get();
+        Subscription subscription = subscriptionRepository.findByCustomerIdAndDietitianId(customer, dietitian);
+        subscription.setCustomerInput(dietitianRequest.getCustomerInput());
+        subscriptionRepository.save(subscription);
+        return "Message sent successfully";
+    }
+
     public String hireDietitian(DietitianRequest dietitianRequest) {
         User customer = getCurrentLoggedUserDetails();
         User dietitian = userRepository.findByUserName(dietitianRequest.getUserName()).get();
