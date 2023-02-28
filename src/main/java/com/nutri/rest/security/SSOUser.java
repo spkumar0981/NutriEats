@@ -18,6 +18,8 @@ public class SSOUser implements UserDetails {
 
     private String username;
 
+    private String nameOfUser;
+
     @JsonIgnore
     private String password;
 
@@ -26,10 +28,12 @@ public class SSOUser implements UserDetails {
     public SSOUser(
             String id,
             String username,
+            String nameOfUser,
             String password,
             Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
         this.username = username;
+        this.nameOfUser = nameOfUser;
         this.password = password;
         this.authorities = authorities;
     }
@@ -41,7 +45,7 @@ public class SSOUser implements UserDetails {
                         .collect(Collectors.toList());
 
         return new SSOUser(
-                user.getId().toString(), user.getUserName(), user.getPassword(), authorities);
+                user.getId().toString(), user.getUserName(), user.getFirstName()+", "+user.getLastName(), user.getPassword(), authorities);
     }
 
     @Override
@@ -61,6 +65,10 @@ public class SSOUser implements UserDetails {
     @Override
     public String getUsername() {
         return username;
+    }
+
+    public String getNameOfUser() {
+        return nameOfUser;
     }
 
     @Override

@@ -152,6 +152,7 @@ public class UserService implements UserDetailsService {
         .token(jwt)
         .id(user.getId())
         .userName(user.getUsername())
+        .nameOfUser(user.getNameOfUser())
         .role(((List)user.getAuthorities()).get(0).toString())
         .build();
   }
