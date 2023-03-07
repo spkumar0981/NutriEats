@@ -34,13 +34,15 @@ public class SubscriptionService {
     private final MenuItemRepository menuItemRepository;
 
     private final ItemRepository itemRepository;
+    private final RatingRepository ratingRepository;
 
-    public SubscriptionService(SubscriptionRepository subscriptionRepository, UserRepository userRepository, LookupRepository lookupRepository, MenuItemRepository menuItemRepository, ItemRepository itemRepository) {
+    public SubscriptionService(SubscriptionRepository subscriptionRepository, UserRepository userRepository, LookupRepository lookupRepository, MenuItemRepository menuItemRepository, ItemRepository itemRepository, RatingRepository ratingRepository) {
         this.subscriptionRepository = subscriptionRepository;
         this.userRepository = userRepository;
         this.lookupRepository = lookupRepository;
         this.menuItemRepository = menuItemRepository;
         this.itemRepository = itemRepository;
+        this.ratingRepository = ratingRepository;
     }
 
     public Page<DietitianListResponse> getAllDietitians(Pageable pageable) {
@@ -48,7 +50,8 @@ public class SubscriptionService {
         return userRepository.findByUserType(UserRoles.ROLE_DIETITIAN.name(), pageable).map(dietitian -> {
             //to check if customer is dietitian is already mapped to current customer
             Subscription subscription = subscriptionRepository.findByCustomerIdAndDietitianId(customer, dietitian);
-            return DietitianMapper.mapFromUserDomainToResponse(dietitian, subscription);
+            Double dietitianRating = ratingRepository.avgRating(dietitian.getId());
+            return DietitianMapper.mapFromUserDomainToResponse(dietitian, subscription, dietitianRating);
         });
     }
 

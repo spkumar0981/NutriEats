@@ -27,4 +27,6 @@ public class DietitianListResponse {
     private String customerInput;
     private String dietitianInput;
 
+    private Double rating;
+
 }

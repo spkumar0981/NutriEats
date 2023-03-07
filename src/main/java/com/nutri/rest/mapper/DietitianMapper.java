@@ -14,7 +14,7 @@ import static com.nutri.rest.utils.AppUtils.castObjectToString;
 
 @UtilityClass
 public class DietitianMapper {
-    public DietitianListResponse mapFromUserDomainToResponse(User user, Subscription subscription){
+    public DietitianListResponse mapFromUserDomainToResponse(User user, Subscription subscription, Double dietitianRating){
         ItemDetailsResponse.LookupUnits lookupUnits = ItemDetailsResponse.LookupUnits.builder()
                 .unitLookupCode(subscription!=null?subscription.getStatus().getLookupValueCode():"")
                 .unitLookupValue(subscription!=null?subscription.getStatus().getLookupValue():"")
@@ -36,6 +36,7 @@ public class DietitianMapper {
                 .customerInput(subscription!=null?subscription.getCustomerInput():"")
                 .dietitianInput(subscription!=null?subscription.getDietitianInput():"")
                 .preferredMealOption(preferredMealOption)
+                .rating(dietitianRating)
                 .build();
     }
 
