@@ -43,6 +43,6 @@ public class User extends AuditableEntity<String> {
 
     @ManyToOne
     @JoinColumn(referencedColumnName = "id", name = "profile")
-    private UserProfile profile;
+    private DietitianProfile profile;
 
 }

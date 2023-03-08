@@ -1,7 +1,7 @@
 package com.nutri.rest.mapper;
 
-import com.nutri.rest.model.ExperienceDetails;
-import com.nutri.rest.model.Recognitions;
+import com.nutri.rest.model.DietitianExperienceDetails;
+import com.nutri.rest.model.DietitianRecognitions;
 import com.nutri.rest.model.User;
 import com.nutri.rest.request.CreateUserRequest;
 import com.nutri.rest.request.ExperienceDetailsRequestAndResponse;
@@ -30,7 +30,7 @@ public class UserMapper {
                 .build();
     }
 
-    public UserResponse mapFromUserDomainToResponseAlongWithProfile(User user, List<Recognitions> recognitions, List<ExperienceDetails> experienceDetails){
+    public UserResponse mapFromUserDomainToResponseAlongWithProfile(User user, List<DietitianRecognitions> recognitions, List<DietitianExperienceDetails> dietitianExperienceDetails){
         UserResponse response =
                 UserResponse
                 .builder()
@@ -65,16 +65,16 @@ public class UserMapper {
                         .unitLookupValue(service.getLookupValue()).build()).collect(Collectors.toList()));
         }
 
-        if(!CollectionUtils.isEmpty(experienceDetails)){
-            response.setExperienceDetails(experienceDetails.stream().map(experienceDetails1 -> ExperienceDetailsRequestAndResponse.builder()
-                    .fromYear(experienceDetails1.getFromYear())
-                    .toYear(experienceDetails1.getToYear())
-                    .organization(experienceDetails1.getOrganization()).build()).collect(Collectors.toList()));
+        if(!CollectionUtils.isEmpty(dietitianExperienceDetails)){
+            response.setExperienceDetails(dietitianExperienceDetails.stream().map(dietitianExperienceDetails1 -> ExperienceDetailsRequestAndResponse.builder()
+                    .fromYear(dietitianExperienceDetails1.getFromYear())
+                    .toYear(dietitianExperienceDetails1.getToYear())
+                    .organization(dietitianExperienceDetails1.getOrganization()).build()).collect(Collectors.toList()));
         }
         if(!CollectionUtils.isEmpty(recognitions)){
-            response.setRecognitions(recognitions.stream().map(recognitions1 -> RecognitionsRequestAndResponse.builder()
-                    .awardsOrRecognitions(recognitions1.getAwardsOrRecognitions())
-                    .yearOfRecognition(recognitions1.getYearOfRecognition()).build()).collect(Collectors.toList()));
+            response.setRecognitions(recognitions.stream().map(dietitianRecognitions1 -> RecognitionsRequestAndResponse.builder()
+                    .awardsOrRecognitions(dietitianRecognitions1.getAwardsOrRecognitions())
+                    .yearOfRecognition(dietitianRecognitions1.getYearOfRecognition()).build()).collect(Collectors.toList()));
         }
         return response;
     }

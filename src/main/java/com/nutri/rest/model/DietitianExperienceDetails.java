@@ -10,8 +10,7 @@ import javax.persistence.*;
 @AllArgsConstructor
 @ToString
 @Data
-public class Recognitions {
-
+public class DietitianExperienceDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -19,6 +18,7 @@ public class Recognitions {
     @ManyToOne
     @JoinColumn(referencedColumnName = "id", name = "userId")
     private User userId;
-    private String awardsOrRecognitions;
-    private Long yearOfRecognition;
+    private String fromYear;
+    private String toYear;
+    private String organization;
 }

@@ -13,7 +13,7 @@ import java.util.Collection;
 @AllArgsConstructor
 @ToString
 @Data
-public class UserProfile {
+public class DietitianProfile {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
