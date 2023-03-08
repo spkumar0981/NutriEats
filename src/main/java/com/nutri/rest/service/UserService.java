@@ -5,10 +5,7 @@ import com.nutri.rest.exception.ValidationException;
 import com.nutri.rest.mapper.AuditLoggingMapper;
 import com.nutri.rest.mapper.UserMapper;
 import com.nutri.rest.model.*;
-import com.nutri.rest.repository.AuditLoggingRepository;
-import com.nutri.rest.repository.LogoutTokensRepository;
-import com.nutri.rest.repository.RoleRepository;
-import com.nutri.rest.repository.UserRepository;
+import com.nutri.rest.repository.*;
 import com.nutri.rest.request.*;
 import com.nutri.rest.response.CaptchaResponse;
 import com.nutri.rest.response.JwtResponse;
@@ -33,6 +30,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
@@ -40,10 +38,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.security.SecureRandom;
 import java.time.LocalDate;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -60,6 +55,12 @@ public class UserService implements UserDetailsService {
   private final MailService mailService;
   private final OTPService otpService;
   private final RoleRepository roleRepository;
+  private final LookupRepository lookupRepository;
+
+  private final RecognitionsRepository recognitionsRepository;
+
+  private final ExperienceDetailsRepository experienceDetailsRepository;
+  private final UserProfileRepository userProfileRepository;
 
   @Value("${bezkoder.app.jwtSecret}")
   private String jwtSecret;
@@ -70,7 +71,7 @@ public class UserService implements UserDetailsService {
           UserRepository userRepository,
           AuthenticationManager authenticationManager,
           JwtUtils jwtUtils,
-          LogoutTokensRepository logoutTokensRepository, AuditLoggingRepository auditLoggingRepository, MailService mailService, OTPService otpService, RoleRepository roleRepository) {
+          LogoutTokensRepository logoutTokensRepository, AuditLoggingRepository auditLoggingRepository, MailService mailService, OTPService otpService, RoleRepository roleRepository, LookupRepository lookupRepository, RecognitionsRepository recognitionsRepository, ExperienceDetailsRepository experienceDetailsRepository, UserProfileRepository userProfileRepository) {
     this.userRepository = userRepository;
     this.authenticationManager = authenticationManager;
     this.jwtUtils = jwtUtils;
@@ -79,6 +80,10 @@ public class UserService implements UserDetailsService {
     this.mailService = mailService;
     this.otpService = otpService;
     this.roleRepository = roleRepository;
+    this.lookupRepository = lookupRepository;
+    this.recognitionsRepository = recognitionsRepository;
+    this.experienceDetailsRepository = experienceDetailsRepository;
+    this.userProfileRepository = userProfileRepository;
   }
 
   public JwtResponse authenticateUser(LoginRequest loginRequest, HttpServletRequest request) {
@@ -222,7 +227,9 @@ public class UserService implements UserDetailsService {
             .findByUserName(userName)
             .orElseThrow(
                 () -> new UsernameNotFoundException("User Not Found with username: " + userName));
-    return UserMapper.mapFromUserDomainToResponse(user);
+    List<Recognitions> recognitionsList = recognitionsRepository.findByUserId(user);
+    List<ExperienceDetails> experienceDetails = experienceDetailsRepository.findByUserId(user);
+    return UserMapper.mapFromUserDomainToResponseAlongWithProfile(user, recognitionsList, experienceDetails);
   }
 
   public Page<UserResponse> getAllUsers(Pageable pageable) {
@@ -317,6 +324,50 @@ public class UserService implements UserDetailsService {
       user.setLastName(updateUserProfileRequest.getLastName());
     if(updateUserProfileRequest.getPrice() != null)
       user.setBasePrice(new BigDecimal(updateUserProfileRequest.getPrice()));
+
+    UserProfile profile = user.getProfile();
+    if(profile == null){
+      profile = UserProfile.builder().build();
+    }
+    profile.setTitle(updateUserProfileRequest.getTitle());
+    profile.setOverallExperience(updateUserProfileRequest.getOverallExperience());
+    profile.setSpecialistExperience(updateUserProfileRequest.getSpecialistExperience());
+    LookupValue qualifiedDegree = lookupRepository.findByLookupValueCode(updateUserProfileRequest.getQualifiedDegree().getUnitLookupCode());
+    profile.setQualifiedDegree(qualifiedDegree);
+    profile.setDegreeUniversity(updateUserProfileRequest.getDegreeUniversity());
+    profile.setDegreeYear(updateUserProfileRequest.getDegreeYear());
+    profile.setBio(updateUserProfileRequest.getBio());
+    profile.setAddress(updateUserProfileRequest.getAddress());
+
+    List<LookupValue> services = updateUserProfileRequest.getServices().stream().map(service ->
+            lookupRepository.findByLookupValueCode(service.getUnitLookupCode())).collect(Collectors.toList());
+    profile.setServices(services);
+    profile = userProfileRepository.save(profile);
+    user.setProfile(profile);
+
+    List<Recognitions> recognitions = recognitionsRepository.findByUserId(user);
+    recognitions.forEach(recognition -> recognitionsRepository.deleteById(recognition.getId()));
+    if(!CollectionUtils.isEmpty(updateUserProfileRequest.getRecognitions())) {
+      recognitions = updateUserProfileRequest.getRecognitions().stream().map(recognition ->
+              Recognitions.builder()
+                      .userId(user)
+                      .awardsOrRecognitions(recognition.getAwardsOrRecognitions())
+                      .yearOfRecognition(recognition.getYearOfRecognition()).build()).collect(Collectors.toList());
+      recognitionsRepository.saveAll(recognitions);
+    }
+
+    List<ExperienceDetails> experienceDetails = experienceDetailsRepository.findByUserId(user);
+    experienceDetails.forEach(experience -> experienceDetailsRepository.deleteById(experience.getId()));
+
+    if(!CollectionUtils.isEmpty(updateUserProfileRequest.getExperienceDetails())) {
+      experienceDetails = updateUserProfileRequest.getExperienceDetails().stream().map(experience ->
+              ExperienceDetails.builder()
+                      .userId(user)
+                      .fromYear(experience.getFromYear())
+                      .toYear(experience.getToYear())
+                      .organization(experience.getOrganization()).build()).collect(Collectors.toList());
+      experienceDetailsRepository.saveAll(experienceDetails);
+    }
 
     return UserMapper.mapFromUserDomainToResponse(userRepository.save(user));
   }
