@@ -49,6 +49,6 @@ public class User extends AuditableEntity<String> {
     @JoinColumn(referencedColumnName = "id", name = "restaurantProfile")
     private RestaurantProfile restaurantProfile;
 
-    private boolean userProfileActivated;
+    private String userProfileActivated;
 
 }
