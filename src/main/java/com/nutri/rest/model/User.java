@@ -45,4 +45,10 @@ public class User extends AuditableEntity<String> {
     @JoinColumn(referencedColumnName = "id", name = "profile")
     private DietitianProfile profile;
 
+    @ManyToOne
+    @JoinColumn(referencedColumnName = "id", name = "restaurantProfile")
+    private RestaurantProfile restaurantProfile;
+
+    private boolean userProfileActivated;
+
 }

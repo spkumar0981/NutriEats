@@ -34,5 +34,7 @@ public class UpdateUserProfileRequest {
     private List<RecognitionsRequestAndResponse> recognitions;
 
     private List<ExperienceDetailsRequestAndResponse> experienceDetails;
+    private int avgCost;
+    private List<ItemDetailsResponse.LookupUnits> cuisines;
 
 }

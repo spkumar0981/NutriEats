@@ -61,6 +61,7 @@ public class UserService implements UserDetailsService {
 
   private final DietitianExperienceDetailsRepository dietitianExperienceDetailsRepository;
   private final DietitianProfileRepository dietitianProfileRepository;
+  private final RestaurantProfileRepository restaurantProfileRepository;
 
   @Value("${bezkoder.app.jwtSecret}")
   private String jwtSecret;
@@ -71,7 +72,7 @@ public class UserService implements UserDetailsService {
           UserRepository userRepository,
           AuthenticationManager authenticationManager,
           JwtUtils jwtUtils,
-          LogoutTokensRepository logoutTokensRepository, AuditLoggingRepository auditLoggingRepository, MailService mailService, OTPService otpService, RoleRepository roleRepository, LookupRepository lookupRepository, DietitianRecognitionsRepository dietitianRecognitionsRepository, DietitianExperienceDetailsRepository dietitianExperienceDetailsRepository, DietitianProfileRepository dietitianProfileRepository) {
+          LogoutTokensRepository logoutTokensRepository, AuditLoggingRepository auditLoggingRepository, MailService mailService, OTPService otpService, RoleRepository roleRepository, LookupRepository lookupRepository, DietitianRecognitionsRepository dietitianRecognitionsRepository, DietitianExperienceDetailsRepository dietitianExperienceDetailsRepository, DietitianProfileRepository dietitianProfileRepository, RestaurantProfileRepository restaurantProfileRepository) {
     this.userRepository = userRepository;
     this.authenticationManager = authenticationManager;
     this.jwtUtils = jwtUtils;
@@ -84,6 +85,7 @@ public class UserService implements UserDetailsService {
     this.dietitianRecognitionsRepository = dietitianRecognitionsRepository;
     this.dietitianExperienceDetailsRepository = dietitianExperienceDetailsRepository;
     this.dietitianProfileRepository = dietitianProfileRepository;
+    this.restaurantProfileRepository = restaurantProfileRepository;
   }
 
   public JwtResponse authenticateUser(LoginRequest loginRequest, HttpServletRequest request) {
@@ -324,9 +326,36 @@ public class UserService implements UserDetailsService {
       user.setLastName(updateUserProfileRequest.getLastName());
     if(updateUserProfileRequest.getPrice() != null)
       user.setBasePrice(new BigDecimal(updateUserProfileRequest.getPrice()));
+    if(!StringUtils.isEmpty(updateUserProfileRequest.getQualifiedDegree()))
+      updateDietitianProfile(user, updateUserProfileRequest);
+    if(!StringUtils.isEmpty(updateUserProfileRequest.getAvgCost()))
+      updateRestaurantProfile(user, updateUserProfileRequest);
+
+
+    return UserMapper.mapFromUserDomainToResponse(userRepository.save(user));
+  }
+
+  private void updateRestaurantProfile(User user, UpdateUserProfileRequest updateUserProfileRequest){
+    RestaurantProfile restaurantProfile = user.getRestaurantProfile();
+    if (restaurantProfile == null) {
+      restaurantProfile = RestaurantProfile.builder().build();
+    }
+
+    restaurantProfile.setBio(updateUserProfileRequest.getBio());
+    restaurantProfile.setAddress(updateUserProfileRequest.getAddress());
+    restaurantProfile.setAvgCost(updateUserProfileRequest.getAvgCost());
+
+    List<LookupValue> cuisines = updateUserProfileRequest.getCuisines().stream().map(cuisine ->
+            lookupRepository.findByLookupValueCode(cuisine.getUnitLookupCode())).collect(Collectors.toList());
+    restaurantProfile.setCuisines(cuisines);
+
+    restaurantProfileRepository.save(restaurantProfile);
+  }
+
+  private void updateDietitianProfile(User user, UpdateUserProfileRequest updateUserProfileRequest){
 
     DietitianProfile profile = user.getProfile();
-    if(profile == null){
+    if (profile == null) {
       profile = DietitianProfile.builder().build();
     }
     profile.setTitle(updateUserProfileRequest.getTitle());
@@ -347,7 +376,7 @@ public class UserService implements UserDetailsService {
 
     List<DietitianRecognitions> recognitions = dietitianRecognitionsRepository.findByUserId(user);
     recognitions.forEach(recognition -> dietitianRecognitionsRepository.deleteById(recognition.getId()));
-    if(!CollectionUtils.isEmpty(updateUserProfileRequest.getRecognitions())) {
+    if (!CollectionUtils.isEmpty(updateUserProfileRequest.getRecognitions())) {
       recognitions = updateUserProfileRequest.getRecognitions().stream().map(recognition ->
               DietitianRecognitions.builder()
                       .userId(user)
@@ -359,7 +388,7 @@ public class UserService implements UserDetailsService {
     List<DietitianExperienceDetails> dietitianExperienceDetails = dietitianExperienceDetailsRepository.findByUserId(user);
     dietitianExperienceDetails.forEach(experience -> dietitianExperienceDetailsRepository.deleteById(experience.getId()));
 
-    if(!CollectionUtils.isEmpty(updateUserProfileRequest.getExperienceDetails())) {
+    if (!CollectionUtils.isEmpty(updateUserProfileRequest.getExperienceDetails())) {
       dietitianExperienceDetails = updateUserProfileRequest.getExperienceDetails().stream().map(experience ->
               DietitianExperienceDetails.builder()
                       .userId(user)
@@ -368,8 +397,6 @@ public class UserService implements UserDetailsService {
                       .organization(experience.getOrganization()).build()).collect(Collectors.toList());
       dietitianExperienceDetailsRepository.saveAll(dietitianExperienceDetails);
     }
-
-    return UserMapper.mapFromUserDomainToResponse(userRepository.save(user));
   }
 
   public UserResponse updatePassword(String userName, UpdateUserPwdRequest updateUserRequest) {
