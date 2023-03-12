@@ -37,4 +37,6 @@ public class UpdateUserProfileRequest {
     private int avgCost;
     private List<ItemDetailsResponse.LookupUnits> cuisines;
 
+    private String restaurantName;
+
 }

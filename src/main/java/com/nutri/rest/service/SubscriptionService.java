@@ -33,15 +33,15 @@ public class SubscriptionService {
 
     private final MenuItemRepository menuItemRepository;
 
-    private final ItemRepository itemRepository;
+    private final ParentItemRepository parentItemRepository;
     private final RatingRepository ratingRepository;
 
-    public SubscriptionService(SubscriptionRepository subscriptionRepository, UserRepository userRepository, LookupRepository lookupRepository, MenuItemRepository menuItemRepository, ItemRepository itemRepository, RatingRepository ratingRepository) {
+    public SubscriptionService(SubscriptionRepository subscriptionRepository, UserRepository userRepository, LookupRepository lookupRepository, MenuItemRepository menuItemRepository, ParentItemRepository parentItemRepository, RatingRepository ratingRepository) {
         this.subscriptionRepository = subscriptionRepository;
         this.userRepository = userRepository;
         this.lookupRepository = lookupRepository;
         this.menuItemRepository = menuItemRepository;
-        this.itemRepository = itemRepository;
+        this.parentItemRepository = parentItemRepository;
         this.ratingRepository = ratingRepository;
     }
 
@@ -146,8 +146,8 @@ public class SubscriptionService {
     }
 
     public List<ItemDetailsResponse.LookupUnits> getItemUnits(String itemName){
-        Item item = itemRepository.findByItemName(itemName);
-        return lookupRepository.findByLookupValueType(item.getLookupValueTypeOfItemUnit()).stream().map(lookupValue -> ItemDetailsResponse.LookupUnits.builder()
+        ParentItem parentItem = parentItemRepository.findByItemName(itemName);
+        return lookupRepository.findByLookupValueType(parentItem.getLookupValueTypeOfItemUnit()).stream().map(lookupValue -> ItemDetailsResponse.LookupUnits.builder()
                 .unitLookupValue(lookupValue.getLookupValue())
                 .unitLookupCode(lookupValue.getLookupValueCode()).build()).collect(Collectors.toList());
     }
@@ -167,9 +167,9 @@ public class SubscriptionService {
         User dietitian = getCurrentLoggedUserDetails();
         User customer = userRepository.findByUserName(customerName).get();
         Subscription subscription = subscriptionRepository.findByCustomerIdAndDietitianId(customer, dietitian);
-        Item item = itemRepository.findByItemName(itemRequest.getItemName());
+        ParentItem parentItem = parentItemRepository.findByItemName(itemRequest.getItemName());
         LookupValue lookupValue = lookupRepository.findByLookupValueCode(itemRequest.getQuantityUnit().getUnitLookupCode());
-        MenuItem menuItem = menuItemRepository.findBySubscriptionIdAndItemId(subscription, item);
+        MenuItem menuItem = menuItemRepository.findBySubscriptionIdAndParentItemId(subscription, parentItem);
         if(menuItem!=null){
             menuItem.setQuantity(itemRequest.getQuantity());
             menuItem.setQuantityUnit(lookupValue);
@@ -177,7 +177,7 @@ public class SubscriptionService {
         }else {
             menuItem = MenuItem.builder()
                     .subscriptionId(subscription)
-                    .itemId(item)
+                    .parentItemId(parentItem)
                     .quantity(itemRequest.getQuantity())
                     .quantityUnit(lookupValue)
                     .isActive("Y")
@@ -194,12 +194,12 @@ public class SubscriptionService {
         User dietitian = getCurrentLoggedUserDetails();
         User customer = userRepository.findByUserName(customerName).get();
         Subscription subscription = subscriptionRepository.findByCustomerIdAndDietitianId(customer, dietitian);
-        Item item = itemRepository.findByItemName(itemName);
-        MenuItem menuItem = menuItemRepository.findBySubscriptionIdAndItemId(subscription, item);
+        ParentItem parentItem = parentItemRepository.findByItemName(itemName);
+        MenuItem menuItem = menuItemRepository.findBySubscriptionIdAndParentItemId(subscription, parentItem);
         menuItem.setIsActive("N");
         menuItemRepository.delete(menuItem);
         return ResponseText.builder()
-                .response("Item deleted successfully").build();
+                .response("ParentItem deleted successfully").build();
     }
 
     public void confirmMealForASubscription(DietitianRequest customerReq){

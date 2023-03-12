@@ -76,6 +76,13 @@ public class UserMapper {
                     .awardsOrRecognitions(dietitianRecognitions1.getAwardsOrRecognitions())
                     .yearOfRecognition(dietitianRecognitions1.getYearOfRecognition()).build()).collect(Collectors.toList()));
         }
+        if(user.getRestaurantProfile() != null){
+            response.setRestaurantName(user.getRestaurantProfile().getRestaurantName());
+            response.setAvgCost(user.getRestaurantProfile().getAvgCost());
+            response.setCuisines(user.getRestaurantProfile().getCuisines().stream().map(lookupValue -> ItemDetailsResponse.LookupUnits.builder()
+                    .unitLookupCode(lookupValue.getLookupValueCode())
+                    .unitLookupValue(lookupValue.getLookupValue()).build()).collect(Collectors.toList()));
+        }
         return response;
     }
 

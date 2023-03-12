@@ -14,6 +14,7 @@ import com.nutri.rest.response.UserResponse;
 import com.nutri.rest.security.JwtUtils;
 import com.nutri.rest.security.SSOUser;
 import com.nutri.rest.utils.AppUtils;
+import com.nutri.rest.utils.UserRoles;
 import io.jsonwebtoken.Jwts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -159,6 +160,7 @@ public class UserService implements UserDetailsService {
         .token(jwt)
         .id(user.getId())
         .userName(user.getUsername())
+        .userProfileActivated(user.getUserProfileActivated())
         .nameOfUser(user.getNameOfUser())
         .role(((List)user.getAuthorities()).get(0).toString())
         .build();
@@ -273,8 +275,17 @@ public class UserService implements UserDetailsService {
     if(userPresent.isPresent())
       throw new ValidationException("Mobile Number already used!! Try with a different number");
 
+    if(createUserRequest.getUserType().equals(UserRoles.ROLE_RESTAURANT.name())){
+      if(restaurantProfileRepository.findByRestaurantName(createUserRequest.getRestaurantName())!=null)
+        throw new ValidationException("Restaurant Name already used!! Try with a different name");;
+    }
+
+    RestaurantProfile restaurantProfile = RestaurantProfile.builder()
+            .restaurantName(createUserRequest.getRestaurantName()).build();
+
     User user = UserMapper.mapFromUserRequestToDomain(
             encryptedPassword, createUserRequest);
+    user.setRestaurantProfile(restaurantProfileRepository.save(restaurantProfile));
     if (!StringUtils.isEmpty(createUserRequest.getUserType())) {
       List<Role> roles = roleRepository.findByCodeName(createUserRequest.getUserType());
       user.setRoles(roles);
@@ -331,6 +342,7 @@ public class UserService implements UserDetailsService {
     if(!StringUtils.isEmpty(updateUserProfileRequest.getAvgCost()))
       updateRestaurantProfile(user, updateUserProfileRequest);
 
+    user.setUserProfileActivated("Y");
 
     return UserMapper.mapFromUserDomainToResponse(userRepository.save(user));
   }
@@ -341,6 +353,7 @@ public class UserService implements UserDetailsService {
       restaurantProfile = RestaurantProfile.builder().build();
     }
 
+    restaurantProfile.setRestaurantName(updateUserProfileRequest.getRestaurantName());
     restaurantProfile.setBio(updateUserProfileRequest.getBio());
     restaurantProfile.setAddress(updateUserProfileRequest.getAddress());
     restaurantProfile.setAvgCost(updateUserProfileRequest.getAvgCost());

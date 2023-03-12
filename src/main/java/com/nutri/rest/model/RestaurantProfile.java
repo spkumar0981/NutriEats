@@ -17,6 +17,9 @@ public class RestaurantProfile {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+
+    @Column(unique = true)
+    private String restaurantName;
     private int avgCost;
     @Column(length = 5000)
     private String bio;

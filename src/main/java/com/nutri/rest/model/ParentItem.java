@@ -6,14 +6,13 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import javax.persistence.*;
-import java.util.Collection;
 
 @Entity
 @Data
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class Item {
+public class ParentItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

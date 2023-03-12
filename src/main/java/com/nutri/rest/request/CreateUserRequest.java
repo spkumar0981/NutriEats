@@ -24,4 +24,6 @@ public class CreateUserRequest {
     private String password;
     @NonNull
     private String phoneNumber;
+
+    private String restaurantName;
 }

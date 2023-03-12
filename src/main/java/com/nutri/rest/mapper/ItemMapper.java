@@ -1,6 +1,6 @@
 package com.nutri.rest.mapper;
 
-import com.nutri.rest.model.Item;
+import com.nutri.rest.model.ParentItem;
 import com.nutri.rest.model.MenuItem;
 import com.nutri.rest.response.ItemDetailsResponse;
 import com.nutri.rest.response.ItemResponse;
@@ -15,15 +15,15 @@ public class ItemMapper {
     public ItemResponse mapToItems(MenuItem menuItem){
         return ItemResponse
                 .builder()
-                .itemName(menuItem.getItemId().getItemName())
+                .itemName(menuItem.getParentItemId().getItemName())
                 .quantity(menuItem.getQuantity())
                 .quantityUnit(menuItem.getQuantityUnit().getLookupValue())
                 .build();
     }
 
-    public ItemDetailsResponse mapToItemDetailsResponse(Item item){
+    public ItemDetailsResponse mapToItemDetailsResponse(ParentItem parentItem){
         return ItemDetailsResponse.builder()
-                .itemName(item.getItemName())
+                .itemName(parentItem.getItemName())
                 .build();
     }
 

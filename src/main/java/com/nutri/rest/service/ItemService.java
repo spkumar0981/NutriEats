@@ -21,18 +21,18 @@ public class ItemService {
 
     private final MenuItemRepository menuItemRepository;
 
-    private final ItemRepository itemRepository;
+    private final ParentItemRepository parentItemRepository;
 
-    public ItemService(SubscriptionRepository subscriptionRepository, UserRepository userRepository, LookupRepository lookupRepository, MenuItemRepository menuItemRepository, ItemRepository itemRepository) {
+    public ItemService(SubscriptionRepository subscriptionRepository, UserRepository userRepository, LookupRepository lookupRepository, MenuItemRepository menuItemRepository, ParentItemRepository parentItemRepository) {
         this.subscriptionRepository = subscriptionRepository;
         this.userRepository = userRepository;
         this.lookupRepository = lookupRepository;
         this.menuItemRepository = menuItemRepository;
-        this.itemRepository = itemRepository;
+        this.parentItemRepository = parentItemRepository;
     }
 
     public List<ItemDetailsResponse> getAllItems(){
-        List<Object[]> items = itemRepository.getAllItemsWithUnitCodes();
+        List<Object[]> items = parentItemRepository.getAllItemsWithUnitCodes();
         if(CollectionUtils.isEmpty(items)){
             return new ArrayList<>();
         }

@@ -19,4 +19,6 @@ public class LookupValue {
     @Column(unique = true)
     private String lookupValueCode;
     private String lookupValue;
+
+    private String lookupCategory;
 }

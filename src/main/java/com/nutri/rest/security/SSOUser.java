@@ -20,6 +20,8 @@ public class SSOUser implements UserDetails {
 
     private String nameOfUser;
 
+    private String userProfileActivated;
+
     @JsonIgnore
     private String password;
 
@@ -29,11 +31,13 @@ public class SSOUser implements UserDetails {
             String id,
             String username,
             String nameOfUser,
+            String userProfileActivated,
             String password,
             Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
         this.username = username;
         this.nameOfUser = nameOfUser;
+        this.userProfileActivated = userProfileActivated;
         this.password = password;
         this.authorities = authorities;
     }
@@ -45,7 +49,7 @@ public class SSOUser implements UserDetails {
                         .collect(Collectors.toList());
 
         return new SSOUser(
-                user.getId().toString(), user.getUserName(), user.getFirstName()+", "+user.getLastName(), user.getPassword(), authorities);
+                user.getId().toString(), user.getUserName(), user.getFirstName()+", "+user.getLastName(), user.getUserProfileActivated(), user.getPassword(), authorities);
     }
 
     @Override
@@ -70,6 +74,8 @@ public class SSOUser implements UserDetails {
     public String getNameOfUser() {
         return nameOfUser;
     }
+
+    public String getUserProfileActivated(){return userProfileActivated;}
 
     @Override
     public boolean isAccountNonExpired() {

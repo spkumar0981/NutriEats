@@ -37,5 +37,8 @@ public class UserResponse {
     private List<RecognitionsRequestAndResponse> recognitions;
 
     private List<ExperienceDetailsRequestAndResponse> experienceDetails;
+    private int avgCost;
+    private List<ItemDetailsResponse.LookupUnits> cuisines;
 
+    private String restaurantName;
 }

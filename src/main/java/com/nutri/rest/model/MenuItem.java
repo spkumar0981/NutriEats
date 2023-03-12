@@ -10,7 +10,7 @@ import javax.persistence.*;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(uniqueConstraints={ @UniqueConstraint(columnNames = {"subscriptionId", "itemId"}) })
+@Table(uniqueConstraints={ @UniqueConstraint(columnNames = {"subscriptionId", "parentItemId"}) })
 public class MenuItem {
 
     @Id
@@ -21,8 +21,8 @@ public class MenuItem {
     @JoinColumn(referencedColumnName = "subscriptionId", name = "subscriptionId")
     private Subscription subscriptionId;
     @ManyToOne
-    @JoinColumn(referencedColumnName = "itemId", name = "itemId")
-    private Item itemId;
+    @JoinColumn(referencedColumnName = "itemId", name = "parentItemId")
+    private ParentItem parentItemId;
 
     private Long quantity;
 
