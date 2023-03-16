@@ -41,4 +41,6 @@ public class UserResponse {
     private List<ItemDetailsResponse.LookupUnits> cuisines;
 
     private String restaurantName;
+
+    private String userProfileActivated;
 }

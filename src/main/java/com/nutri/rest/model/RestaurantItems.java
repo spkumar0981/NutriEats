@@ -22,9 +22,10 @@ public class RestaurantItems {
     @ManyToOne
     @JoinColumn(referencedColumnName = "itemId", name = "childItemId")
     private ChildItem childItemId;
+    @Lob
+    private byte[] itemImage;
     private String availableFromTime;
     private String availableToTime;
-    private BigDecimal itemPrice;
     private String itemDescription;
     private String isActive; //if the item is exhausted for the day, then we can use this flag to deactivate it
 }

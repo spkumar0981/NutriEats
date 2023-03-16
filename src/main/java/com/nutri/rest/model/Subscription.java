@@ -44,4 +44,6 @@ public class Subscription {
     private String dietitianInput;
     private LocalDate subscriptionExpireDate;
 
+    private String allergens;
+
 }

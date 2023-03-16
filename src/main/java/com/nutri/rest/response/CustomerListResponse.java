@@ -26,4 +26,6 @@ public class CustomerListResponse {
     private String customerInput;
     private String dietitianInput;
 
+    private String allergens;
+
 }

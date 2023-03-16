@@ -24,7 +24,11 @@ public class MenuItem {
     @JoinColumn(referencedColumnName = "itemId", name = "parentItemId")
     private ParentItem parentItemId;
 
+    private String childItems;
+
     private Long quantity;
+
+    private String instructions;
 
     private String isActive;
     @ManyToOne

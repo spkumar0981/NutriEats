@@ -14,7 +14,11 @@ import java.math.BigDecimal;
 public class ItemResponse {
 
     private String itemName;
+
+    private String childItems;
     private Long quantity;
     private String quantityUnit;
+
+    private String instructions;
 
 }

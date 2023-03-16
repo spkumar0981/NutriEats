@@ -30,6 +30,7 @@ public class CustomerMapper {
                 .customerInput(subscription!=null?subscription.getCustomerInput():"")
                 .dietitianInput(subscription!=null?subscription.getDietitianInput():"")
                 .preferredMealOption(preferredMealOption)
+                .allergens(subscription!=null?subscription.getAllergens():"")
                 .build();
     }
 
@@ -65,6 +66,7 @@ public class CustomerMapper {
                 .dietitianInput(castObjectToString(user[7]))
                 .subscriptionAmount(castObjectToBigDecimal(user[8]))
                 .preferredMealOption(preferredMeal)
+                .allergens(castObjectToString(user[11]))
                 .build();
     }
 

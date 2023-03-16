@@ -1,19 +1,13 @@
 package com.nutri.rest.mapper;
 
-import com.nutri.rest.model.DietitianExperienceDetails;
-import com.nutri.rest.model.DietitianRecognitions;
+import com.nutri.rest.model.RestaurantItems;
 import com.nutri.rest.model.User;
-import com.nutri.rest.request.CreateUserRequest;
-import com.nutri.rest.request.ExperienceDetailsRequestAndResponse;
-import com.nutri.rest.request.RecognitionsRequestAndResponse;
+import com.nutri.rest.response.RestaurantItemsResponse;
 import com.nutri.rest.response.ItemDetailsResponse;
 import com.nutri.rest.response.RestaurantListResponse;
-import com.nutri.rest.response.UserResponse;
 import lombok.experimental.UtilityClass;
-import org.springframework.util.CollectionUtils;
 
-import java.time.LocalDate;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @UtilityClass

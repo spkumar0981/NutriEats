@@ -1,12 +1,9 @@
 package com.nutri.rest.controller;
 
-import com.nutri.rest.request.DietitianRequest;
-import com.nutri.rest.request.common.RestaurantItemsReqAndResp;
-import com.nutri.rest.response.CustomerListResponse;
-import com.nutri.rest.response.DietitianListResponse;
+import com.nutri.rest.request.RestaurantItemsRequest;
+import com.nutri.rest.response.RestaurantItemsResponse;
 import com.nutri.rest.response.RestaurantListResponse;
 import com.nutri.rest.service.RestaurantService;
-import com.nutri.rest.service.SubscriptionService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.data.domain.Page;
@@ -15,7 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import java.util.Collection;
 
 @RestController
 @RequestMapping("/api/v1/restaurants")
@@ -36,22 +33,22 @@ public class RestaurantController {
 
     @GetMapping("/items")
     @ApiOperation(value = "Get Items served by Restaurant")
-    public Page<RestaurantItemsReqAndResp> getRestaurantItems(Pageable pageable){
-        return restaurantService.getRestaurantItemsWhenLogged(pageable);
+    public Collection<RestaurantItemsResponse> getRestaurantItems(){
+        return restaurantService.getRestaurantItemsWhenLogged();
     }
 
 
 
     @GetMapping("/{restaurantUsername}/items")
     @ApiOperation(value = "Get Items served by Restaurant")
-    public Page<RestaurantItemsReqAndResp> getRestaurantItems(@PathVariable String restaurantUsername, Pageable pageable){
-        return restaurantService.getRestaurantItemsWhenNotLogged(restaurantUsername, pageable);
+    public Collection<RestaurantItemsResponse> getRestaurantItems(@PathVariable String restaurantUsername){
+        return restaurantService.getRestaurantItemsWhenNotLogged(restaurantUsername);
     }
 
     @PostMapping("/items")
     @ApiOperation(value = "Create Items served by Restaurant")
-    public ResponseEntity<Object> postRestaurantItems(@RequestBody RestaurantItemsReqAndResp itemsReqAndResp, Pageable pageable){
-        restaurantService.createRestaurantItems(itemsReqAndResp, pageable);
+    public ResponseEntity<Object> postRestaurantItems(@RequestBody RestaurantItemsRequest itemsRequest){
+        restaurantService.createRestaurantItems(itemsRequest);
         return new ResponseEntity<>("Item created successfully", HttpStatus.OK);
     }
 }

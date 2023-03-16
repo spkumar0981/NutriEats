@@ -39,7 +39,7 @@ public class DietitianController {
     }
 
     @PostMapping("/customer/items")
-    @ApiOperation(value = "Prepare meal for a subscription")
+    @ApiOperation(value = "Confirm meal for a subscription")
     public ResponseEntity<Object> confirmMealForASubscription(@Valid @RequestBody DietitianRequest customer){
         subscriptionService.confirmMealForASubscription(customer);
         return new ResponseEntity<>("Meal Confirmed", HttpStatus.OK);

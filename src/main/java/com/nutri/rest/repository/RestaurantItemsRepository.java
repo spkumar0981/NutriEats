@@ -12,6 +12,6 @@ import java.util.List;
 
 @Repository
 public interface RestaurantItemsRepository extends JpaRepository<RestaurantItems, Long> {
-    Page<RestaurantItems> findByRestaurantId(User user, Pageable pageable);
+    List<RestaurantItems> findByRestaurantId(User user);
     RestaurantItems findByRestaurantIdAndChildItemId(User user, ChildItem childItem);
 }

@@ -61,4 +61,10 @@ public class ItemController {
     public List<ItemDetailsResponse> getItems(){
         return itemService.getAllItems();
     }
+
+    @GetMapping("/child/items/{parentItemName}")
+    @ApiOperation(value = "Get child items")
+    public List<ItemDetailsResponse> getChildItems(@PathVariable String parentItemName){
+        return itemService.getChildItemsOfParent(parentItemName);
+    }
 }

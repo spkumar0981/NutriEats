@@ -18,11 +18,9 @@ public class ChildItem {
 
     @Column(unique = true)
     private String itemName;
-    @Lob
-    private byte[] itemImage;
     private String itemCategory;
 
-    private Long lookupValueTypeOfItemUnit;
+//    private Long lookupValueTypeOfItemUnit; //weights are maintained in restaurant menu table itself
 
     @ManyToOne
     @JoinColumn(referencedColumnName = "itemId", name = "parentItemId")

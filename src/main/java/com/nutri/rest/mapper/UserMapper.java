@@ -12,6 +12,7 @@ import lombok.experimental.UtilityClass;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,6 +28,7 @@ public class UserMapper {
                 .userName(user.getUserName())
                 .phoneNumber(user.getPhoneNumber())
                 .price(user.getBasePrice())
+                .userProfileActivated(user.getUserProfileActivated())
                 .build();
     }
 
@@ -39,6 +41,7 @@ public class UserMapper {
                 .userName(user.getUserName())
                 .phoneNumber(user.getPhoneNumber())
                 .price(user.getBasePrice())
+                .userProfileActivated(user.getUserProfileActivated())
                 .build();
 
         if(user.getProfile() !=null){

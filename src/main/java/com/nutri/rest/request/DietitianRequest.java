@@ -28,4 +28,6 @@ public class DietitianRequest {
 
     private ItemDetailsResponse.LookupUnits preferredMealOption;
 
+    private String[] allergens;
+
 }

@@ -13,7 +13,11 @@ import lombok.NoArgsConstructor;
 public class ItemRequest {
 
     private String itemName;
+
+    private String[] childItems;
     private Long quantity;
+
+    private String instructions;
     private ItemDetailsResponse.LookupUnits quantityUnit;
 
 }

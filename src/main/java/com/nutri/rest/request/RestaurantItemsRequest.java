@@ -1,24 +1,32 @@
-package com.nutri.rest.request.common;
+package com.nutri.rest.request;
 
+import com.nutri.rest.model.LookupValue;
+import com.nutri.rest.response.ItemDetailsResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class RestaurantItemsReqAndResp {
+public class RestaurantItemsRequest {
     private String restaurantUserName;
+    private String parentItemName;
     private String itemName;
     private String availableFromTime;
     private String availableToTime;
     private BigDecimal itemPrice;
     private String itemDescription;
     private String isActive;
-    private byte[] itemImage;
+    private String itemImage;
     private String itemCategory;
-    private String parentItemName;
+    private Long quantity;
+    private ItemDetailsResponse.LookupUnits quantityUnit;
 }

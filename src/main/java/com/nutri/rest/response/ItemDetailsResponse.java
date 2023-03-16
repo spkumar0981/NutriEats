@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.persistence.Lob;
 import java.util.List;
 import java.util.Map;
 
@@ -15,6 +16,7 @@ import java.util.Map;
 public class ItemDetailsResponse {
 
     private String itemName;
+    private byte[] itemImage;
 
     private List<LookupUnits> itemUnitsAndCodes;
 

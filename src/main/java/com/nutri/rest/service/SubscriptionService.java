@@ -17,8 +17,10 @@ import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.nutri.rest.utils.SubscriptionStatus.SUBSCRIPTION_STATUS_2;
 
@@ -107,6 +109,7 @@ public class SubscriptionService {
                 .customerInput(dietitianRequest.getCustomerInput())
                 .subscriptionExpireDate(LocalDate.now().plusWeeks(1))
                 .preferredMealOption(preferredMealOption)
+                .allergens(Stream.of(dietitianRequest.getAllergens()).collect(Collectors.joining(",")))
                 .build();
         subscriptionRepository.save(subscription);
         return "Dietitian hired successfully";
@@ -174,13 +177,17 @@ public class SubscriptionService {
             menuItem.setQuantity(itemRequest.getQuantity());
             menuItem.setQuantityUnit(lookupValue);
             menuItem.setIsActive("Y");
+            menuItem.setChildItems(Arrays.stream(itemRequest.getChildItems()).collect(Collectors.joining(",")));
+            menuItem.setInstructions(itemRequest.getInstructions());
         }else {
             menuItem = MenuItem.builder()
                     .subscriptionId(subscription)
                     .parentItemId(parentItem)
+                    .childItems(Arrays.stream(itemRequest.getChildItems()).collect(Collectors.joining(",")))
                     .quantity(itemRequest.getQuantity())
                     .quantityUnit(lookupValue)
                     .isActive("Y")
+                    .instructions(itemRequest.getInstructions())
                     .build();
         }
         menuItemRepository.save(menuItem);

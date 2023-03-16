@@ -2,7 +2,6 @@ package com.nutri.rest.mapper;
 
 import com.nutri.rest.model.Subscription;
 import com.nutri.rest.model.User;
-import com.nutri.rest.response.CustomerListResponse;
 import com.nutri.rest.response.DietitianListResponse;
 import com.nutri.rest.response.ItemDetailsResponse;
 import lombok.experimental.UtilityClass;
@@ -37,6 +36,7 @@ public class DietitianMapper {
                 .dietitianInput(subscription!=null?subscription.getDietitianInput():"")
                 .preferredMealOption(preferredMealOption)
                 .rating(dietitianRating)
+                .allergens(subscription!=null?subscription.getAllergens():"")
                 .build();
     }
 
@@ -62,6 +62,7 @@ public class DietitianMapper {
                 .dietitianInput(castObjectToString(user[7]))
                 .subscriptionAmount(castObjectToBigDecimal(user[8]))
                 .preferredMealOption(preferredMeal)
+                .allergens(castObjectToString(user[11]))
                 .build();
     }
 }

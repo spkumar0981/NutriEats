@@ -21,8 +21,6 @@ public class ParentItem {
     @Column(unique = true)
     private String itemName;
     private String itemDescription;
-    @Lob
-    private byte[] itemImage;
     private String itemCategory;
 
     private Long lookupValueTypeOfItemUnit;
