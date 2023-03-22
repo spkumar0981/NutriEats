@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -86,4 +87,16 @@ public interface UserRepository extends JpaRepository<User, Long> {
                     "WHERE R.CODE_NAME = 'ROLE_DIETITIAN' AND CUSTOMER.USER_NAME=?1",
             nativeQuery = true)
     Page<Object[]> getAllHiredDietitiansOfCustomer(String customerUsername, Pageable pageable);
+
+    @Query(value = "SELECT DISTINCT RESTAURANT.USER_NAME, RP.RESTAURANT_NAME " +
+            "FROM USER RESTAURANT " +
+            "INNER JOIN USER_ROLE UR ON (UR.USER_ID=RESTAURANT.ID) " +
+            "INNER JOIN ROLE R ON (UR.ROLE_ID=R.ID) " +
+            "INNER JOIN RESTAURANT_PROFILE RP ON (RP.ID=RESTAURANT.RESTAURANT_PROFILE) " +
+            "INNER JOIN RESTAURANT_ITEMS RI ON (RI.RESTAURANT_ID=RESTAURANT.ID) " +
+            "INNER JOIN CHILD_ITEM CHILD ON (CHILD.ITEM_ID=RI.CHILD_ITEM_ID) " +
+            "INNER JOIN PARENT_ITEM PARENT ON (PARENT.ITEM_ID=CHILD.PARENT_ITEM_ID) " +
+            "WHERE R.CODE_NAME = 'ROLE_RESTAURANT' AND PARENT.ITEM_NAME=?1",
+            nativeQuery = true)
+    List<Object[]> getAllRestaurantsByParentItem(String parentItemName);
 }

@@ -5,6 +5,8 @@ import com.nutri.rest.model.ChildItem;
 import com.nutri.rest.model.ParentItem;
 import com.nutri.rest.repository.*;
 import com.nutri.rest.response.ItemDetailsResponse;
+import com.nutri.rest.response.RestaurantListResponse;
+import com.nutri.rest.utils.AppUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -50,5 +52,16 @@ public class ItemService {
         if(childItems==null)
             return new ArrayList<>();
         return childItems.stream().map(ItemMapper::mapChildItemDetailsToResponse).collect(Collectors.toList());
+    }
+
+    public List<RestaurantListResponse> getRestaurantsByParentItem(String parentItemName){
+        List<Object[]> restaurantList = userRepository.getAllRestaurantsByParentItem(parentItemName);
+        List<RestaurantListResponse> listResponses = new ArrayList<>();
+        if(!CollectionUtils.isEmpty(restaurantList)){
+            listResponses = restaurantList.stream().map(restaurant -> RestaurantListResponse.builder()
+                    .userName(AppUtils.castObjectToString(restaurant[0]))
+                    .restaurantName(AppUtils.castObjectToString(restaurant[1])).build()).collect(Collectors.toList());
+        }
+        return listResponses;
     }
 }

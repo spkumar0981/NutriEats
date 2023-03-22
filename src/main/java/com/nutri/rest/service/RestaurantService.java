@@ -8,6 +8,7 @@ import com.nutri.rest.request.RestaurantItemsRequest;
 import com.nutri.rest.response.ItemDetailsResponse;
 import com.nutri.rest.response.RestaurantItemsResponse;
 import com.nutri.rest.response.RestaurantListResponse;
+import com.nutri.rest.utils.ItemWeightsAndPrices;
 import com.nutri.rest.utils.UserRoles;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -116,8 +117,8 @@ public class RestaurantService {
             }else {
                 childItems = resp.getChildItems();
             }
-            List<RestaurantItemsResponse.ItemWeightsAndPrices> itemWeightsAndPrices = itemWeightsAndPricesRepository.findByRestaurantItemId(item).stream()
-                    .map(restaurantItemWeightsAndPrices -> RestaurantItemsResponse.ItemWeightsAndPrices.builder()
+            List<ItemWeightsAndPrices> itemWeightsAndPrices = itemWeightsAndPricesRepository.findByRestaurantItemId(item).stream()
+                    .map(restaurantItemWeightsAndPrices -> ItemWeightsAndPrices.builder()
                             .quantity(restaurantItemWeightsAndPrices.getQuantity())
                             .quantityUnit(ItemDetailsResponse.LookupUnits.builder()
                                     .unitLookupCode(restaurantItemWeightsAndPrices.getQuantityUnit().getLookupValueCode())

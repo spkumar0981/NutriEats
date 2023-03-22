@@ -37,8 +37,6 @@ public class RestaurantController {
         return restaurantService.getRestaurantItemsWhenLogged();
     }
 
-
-
     @GetMapping("/{restaurantUsername}/items")
     @ApiOperation(value = "Get Items served by Restaurant")
     public Collection<RestaurantItemsResponse> getRestaurantItems(@PathVariable String restaurantUsername){

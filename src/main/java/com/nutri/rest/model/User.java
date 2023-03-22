@@ -50,4 +50,6 @@ public class User extends AuditableEntity<String> {
 
     private String userProfileActivated;
 
+    private String address;
+
 }

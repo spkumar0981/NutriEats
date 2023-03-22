@@ -1,14 +1,11 @@
 package com.nutri.rest.response;
 
-import com.nutri.rest.model.LookupValue;
+import com.nutri.rest.utils.ItemWeightsAndPrices;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import java.math.BigDecimal;
 import java.util.List;
 
 @Data
@@ -34,15 +31,5 @@ public class RestaurantItemsResponse {
         private byte[] itemImage;
         private String itemCategory;
         private List<ItemWeightsAndPrices> itemWeightsAndPrices;
-    }
-
-    @Data
-    @Builder
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class ItemWeightsAndPrices{
-        private BigDecimal itemPrice;
-        private Long quantity;
-        private ItemDetailsResponse.LookupUnits quantityUnit;
     }
 }

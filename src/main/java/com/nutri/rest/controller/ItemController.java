@@ -3,6 +3,7 @@ package com.nutri.rest.controller;
 import com.nutri.rest.request.ItemRequest;
 import com.nutri.rest.response.ItemDetailsResponse;
 import com.nutri.rest.response.ItemResponse;
+import com.nutri.rest.response.RestaurantListResponse;
 import com.nutri.rest.service.ItemService;
 import com.nutri.rest.service.SubscriptionService;
 import io.swagger.annotations.Api;
@@ -66,5 +67,11 @@ public class ItemController {
     @ApiOperation(value = "Get child items")
     public List<ItemDetailsResponse> getChildItems(@PathVariable String parentItemName){
         return itemService.getChildItemsOfParent(parentItemName);
+    }
+
+    @GetMapping("/restaurants/{parentItemName}")
+    @ApiOperation(value = "Get available restaurants where the corresponding items are served")
+    public List<RestaurantListResponse> getRestaurantItems(@PathVariable String parentItemName){
+        return itemService.getRestaurantsByParentItem(parentItemName);
     }
 }
