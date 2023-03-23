@@ -33,4 +33,6 @@ public class Order {
     private LookupValue orderStatusId;
 
     private BigDecimal orderTotalPrice;
+
+    private String deliveryAddress;
 }

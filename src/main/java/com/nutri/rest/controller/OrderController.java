@@ -2,6 +2,7 @@ package com.nutri.rest.controller;
 
 import com.nutri.rest.request.OrderRequest;
 import com.nutri.rest.request.RecurringOrderRequest;
+import com.nutri.rest.response.ItemDetailsResponse;
 import com.nutri.rest.response.OrderResponse;
 import com.nutri.rest.response.RecurringOrderDetailsResponse;
 import com.nutri.rest.response.RecurringOrderResponse;
@@ -24,16 +25,29 @@ public class OrderController {
         this.orderService = orderService;
     }
 
-    @GetMapping("/customer")
-    @ApiOperation(value = "Get all customer orders")
-    public List<OrderResponse> getAllCustomerOrders(){
-        return orderService.getCreatedOrdersForCustomer();
-    }
-
     @GetMapping("/restaurant")
     @ApiOperation(value = "Get all restaurant orders")
     public List<OrderResponse> getAllRestaurantOrders(){
         return orderService.getCreatedOrdersForRestaurant();
+    }
+
+    @GetMapping("/restaurant/status")
+    @ApiOperation(value = "Get next status for restaurant")
+    public ItemDetailsResponse.LookupUnits getNextOrderStatus(@RequestParam String orderStatus){
+        return orderService.getNextOrderStatus(orderStatus);
+    }
+
+    @PostMapping("/restaurant")
+    @ApiOperation(value = "update restaurant orders")
+    public ResponseEntity<Object> updateRestaurantOrders(@RequestBody OrderResponse orderRequest){
+        orderService.updateCreatedOrdersForRestaurant(orderRequest);
+        return new ResponseEntity<>("Completed", HttpStatus.OK);
+    }
+
+    @GetMapping("/customer")
+    @ApiOperation(value = "Get all customer orders")
+    public List<OrderResponse> getAllCustomerOrders(){
+        return orderService.getCreatedOrdersForCustomer();
     }
 
     @GetMapping("/customer/{customerUserName}")
@@ -50,14 +64,14 @@ public class OrderController {
 
     @PostMapping("/customer")
     @ApiOperation(value = "Create customer orders")
-    public OrderResponse createOrderForCustomer(@RequestParam String restaurantUserName, @RequestBody List<OrderRequest> orderRequestList){
-        return orderService.createOrder(orderRequestList, restaurantUserName);
+    public OrderResponse createOrderForCustomer(@RequestParam String restaurantUserName, @RequestParam String deliveryAddress, @RequestBody List<OrderRequest> orderRequestList){
+        return orderService.createOrder(orderRequestList, restaurantUserName, deliveryAddress);
     }
 
     @PostMapping("/recurring")
     @ApiOperation(value = "Create recurring orders for customer")
-    public String createRecurringOrderForCustomerByDietitian(@RequestParam String customerUserName, @RequestBody List<RecurringOrderRequest> orderRequestList){
-        return orderService.createRecurringOrder(orderRequestList, customerUserName);
+    public String createRecurringOrderForCustomerByDietitian(@RequestParam String customerUserName, @RequestParam String deliveryAddress, @RequestBody List<RecurringOrderRequest> orderRequestList){
+        return orderService.createRecurringOrder(orderRequestList, customerUserName, deliveryAddress);
     }
 
     @PostMapping("/recurring/update")

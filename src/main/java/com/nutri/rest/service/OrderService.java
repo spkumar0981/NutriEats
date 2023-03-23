@@ -4,10 +4,7 @@ import com.nutri.rest.model.*;
 import com.nutri.rest.repository.*;
 import com.nutri.rest.request.OrderRequest;
 import com.nutri.rest.request.RecurringOrderRequest;
-import com.nutri.rest.response.OrderItemResponse;
-import com.nutri.rest.response.OrderResponse;
-import com.nutri.rest.response.RecurringOrderDetailsResponse;
-import com.nutri.rest.response.RecurringOrderResponse;
+import com.nutri.rest.response.*;
 import com.nutri.rest.utils.AppUtils;
 import com.nutri.rest.utils.OrderStatus;
 import com.nutri.rest.utils.RecurringOrderStatus;
@@ -20,6 +17,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static com.nutri.rest.utils.LookupTypes.ORDER_STATUS_TYPE;
+import static com.nutri.rest.utils.OrderStatus.*;
 
 @Service
 @Slf4j
@@ -51,7 +51,7 @@ public class OrderService {
         this.subscriptionRepository = subscriptionRepository;
     }
 
-    public OrderResponse createOrder(List<OrderRequest> orderRequestList, String restaurantUserName){
+    public OrderResponse createOrder(List<OrderRequest> orderRequestList, String restaurantUserName, String deliveryAddress){
         User restaurant = userRepository.findByUserName(restaurantUserName).get();
         User customer = getCurrentLoggedUserDetails();
 
@@ -59,6 +59,7 @@ public class OrderService {
                 .orderStatusId(lookupRepository.findByLookupValueCode(OrderStatus.ORDER_STATUS_1.name()))
                 .customerId(customer)
                 .restaurantId(restaurant)
+                .deliveryAddress(deliveryAddress)
                 .build();
         Order finalOrder = orderRepository.save(order);
 
@@ -103,6 +104,7 @@ public class OrderService {
                         .restaurantName(order.getRestaurantId().getRestaurantProfile().getRestaurantName())
                         .dietitianName(order.getDietitianId()!=null  ? order.getDietitianId().getFirstName()+", "+order.getDietitianId().getLastName() : null)
                         .orderTotalPrice(order.getOrderTotalPrice())
+                        .deliveryAddress(order.getDeliveryAddress())
                         .build()
         ).collect(Collectors.toList());
     }
@@ -122,6 +124,7 @@ public class OrderService {
                         .restaurantName(order.getRestaurantId().getRestaurantProfile().getRestaurantName())
                         .dietitianName(order.getDietitianId()!=null  ? order.getDietitianId().getFirstName()+", "+order.getDietitianId().getLastName() : null)
                         .orderTotalPrice(order.getOrderTotalPrice())
+                        .deliveryAddress(order.getDeliveryAddress())
                         .build()
         ).collect(Collectors.toList());
     }
@@ -140,8 +143,32 @@ public class OrderService {
                         .restaurantName(order.getRestaurantId().getRestaurantProfile().getRestaurantName())
                         .dietitianName(order.getDietitianId()!=null  ? order.getDietitianId().getFirstName()+", "+order.getDietitianId().getLastName() : null)
                         .orderTotalPrice(order.getOrderTotalPrice())
+                        .deliveryAddress(order.getDeliveryAddress())
                         .build()
         ).collect(Collectors.toList());
+    }
+
+    public ItemDetailsResponse.LookupUnits getNextOrderStatus(String orderStatus){
+        List<LookupValue> lookupValues = lookupRepository.findByLookupValueType(ORDER_STATUS_TYPE.getValue());
+        LookupValue currentLookupValue = lookupRepository.findByLookupValueCode(orderStatus);
+
+        LookupValue resultLookup = null;
+        for (LookupValue lookupValue:lookupValues) {
+            if(currentLookupValue.getLookupValueId()<lookupValue.getLookupValueId()
+             && ((resultLookup == null) || (resultLookup!=null && resultLookup.getLookupValueId()>lookupValue.getLookupValueId()))){
+                resultLookup = lookupValue;
+            }
+        }
+        return ItemDetailsResponse.LookupUnits.builder()
+                .unitLookupCode(resultLookup.getLookupValueCode())
+                .unitLookupValue(resultLookup.getLookupValue()).build();
+    }
+
+    public void updateCreatedOrdersForRestaurant(OrderResponse orderRequest){
+        long orderIdVal = Long.parseLong(orderRequest.getOrderId().replace("ORDER-",""));
+        Order order = orderRepository.findById(orderIdVal).get();
+        order.setOrderStatusId(lookupRepository.findByLookupValueCode(orderRequest.getOrderStatusCode()));
+        orderRepository.save(order);
     }
 
     private User getCurrentLoggedUserDetails(){
@@ -150,7 +177,7 @@ public class OrderService {
     }
 
     ///****************************************Recurring Orders***********************************************
-    public String createRecurringOrder(List<RecurringOrderRequest> orderRequestList, String customerUserName){
+    public String createRecurringOrder(List<RecurringOrderRequest> orderRequestList, String customerUserName, String deliveryAddress){
         User customer = userRepository.findByUserName(customerUserName).get();
         User dietitian = getCurrentLoggedUserDetails();
 
@@ -173,6 +200,7 @@ public class OrderService {
                     .toDate(recurringOrderRequest.getToDate())
                     .menuItemId(menuItem)
                     .orderStatus(lookupRepository.findByLookupValueCode(RecurringOrderStatus.REC_ORDER_STATUS_1.name()))
+                    .deliveryAddress(deliveryAddress)
                     .build();
             recurringOrderRepository.save(recurringOrders);
         });
@@ -201,7 +229,7 @@ public class OrderService {
                         .restaurantName(recurringOrder.getRestaurantId().getRestaurantProfile().getRestaurantName())
                         .customerName(recurringOrder.getMenuItemId().getSubscriptionId().getCustomerId().getFirstName()+", "
                                 +recurringOrder.getMenuItemId().getSubscriptionId().getCustomerId().getLastName())
-                        .customerAddress(recurringOrder.getMenuItemId().getSubscriptionId().getCustomerId().getAddress())
+                        .customerAddress(recurringOrder.getDeliveryAddress())
                         .dietitianName(recurringOrder.getMenuItemId().getSubscriptionId().getDietitianId().getFirstName()+", "
                                 +recurringOrder.getMenuItemId().getSubscriptionId().getDietitianId().getLastName())
                         .orderStatus(lookupRepository.findByLookupValueCode(recurringOrder.getOrderStatus().getLookupValueCode()).getLookupValue())

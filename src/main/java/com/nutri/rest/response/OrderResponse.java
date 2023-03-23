@@ -13,9 +13,11 @@ import java.util.List;
 public class OrderResponse {
     private String orderId;
     private String customerName;
+    private String deliveryAddress;
     private String restaurantName;
     private String dietitianName;
     private String orderStatus;
+    private String orderStatusCode;
     private List<OrderItemResponse> orderItems;
     private BigDecimal orderTotalPrice;
 }

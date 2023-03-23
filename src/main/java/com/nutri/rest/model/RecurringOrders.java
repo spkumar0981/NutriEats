@@ -37,4 +37,6 @@ public class RecurringOrders {
     @ManyToOne
     @JoinColumn(referencedColumnName = "lookupValueId", name = "orderStatus")
     private LookupValue orderStatus;
+
+    private String deliveryAddress;
 }
