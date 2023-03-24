@@ -33,8 +33,15 @@ public class OrderController {
 
     @GetMapping("/restaurant/status")
     @ApiOperation(value = "Get next status for restaurant")
-    public ItemDetailsResponse.LookupUnits getNextOrderStatus(@RequestParam String orderStatus){
-        return orderService.getNextOrderStatus(orderStatus);
+    public ItemDetailsResponse.LookupUnits getNextOrderStatus(@RequestParam String orderId){
+        return orderService.getNextOrderStatus(orderId);
+    }
+
+    @PostMapping("/restaurant/status")
+    @ApiOperation(value = "Get next status for restaurant")
+    public ResponseEntity<Object> setNextOrderStatus(@RequestParam String orderId){
+        orderService.setOrderStatus(orderId);
+        return new ResponseEntity<>("Completed", HttpStatus.OK);
     }
 
     @PostMapping("/restaurant")

@@ -11,5 +11,6 @@ import lombok.*;
 public class OrderItemResponse {
     private Long quantity;
     private String childItemName;
+    private String parentItemName;
     private ItemWeightsAndPrices itemWeightsAndPrices;
 }

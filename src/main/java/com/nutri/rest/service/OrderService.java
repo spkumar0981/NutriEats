@@ -5,10 +5,7 @@ import com.nutri.rest.repository.*;
 import com.nutri.rest.request.OrderRequest;
 import com.nutri.rest.request.RecurringOrderRequest;
 import com.nutri.rest.response.*;
-import com.nutri.rest.utils.AppUtils;
-import com.nutri.rest.utils.OrderStatus;
-import com.nutri.rest.utils.RecurringOrderStatus;
-import com.nutri.rest.utils.SubscriptionStatus;
+import com.nutri.rest.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -98,6 +95,17 @@ public class OrderService {
                         .orderId("ORDER-"+order.getOrderId())
                         .orderItems(orderItemsRepository.findByOrderId(order)
                                 .stream().map(orderItem -> OrderItemResponse.builder()
+                                        .childItemName(orderItem.getChildItem().getItemName())
+                                        .parentItemName(orderItem.getChildItem().getParentItem().getItemName())
+                                        .quantity(orderItem.getQuantity())
+                                        .itemWeightsAndPrices(ItemWeightsAndPrices.builder()
+                                                .quantity(orderItem.getItemWeightsAndPrices().getQuantity())
+                                                .itemPrice(orderItem.getItemWeightsAndPrices().getItemPrice())
+                                                .quantityUnit(ItemDetailsResponse.LookupUnits.builder()
+                                                        .unitLookupValue(orderItem.getItemWeightsAndPrices().getQuantityUnit().getLookupValue())
+                                                        .unitLookupCode(orderItem.getItemWeightsAndPrices().getQuantityUnit().getLookupValueCode())
+                                                        .build())
+                                                .build())
                                         .build()).collect(Collectors.toList()))
                         .orderStatus(order.getOrderStatusId().getLookupValue())
                         .customerName(customer.getFirstName()+", "+customer.getLastName())
@@ -118,6 +126,17 @@ public class OrderService {
                         .orderId("ORDER-"+order.getOrderId())
                         .orderItems(orderItemsRepository.findByOrderId(order)
                                 .stream().map(orderItem -> OrderItemResponse.builder()
+                                        .childItemName(orderItem.getChildItem().getItemName())
+                                        .parentItemName(orderItem.getChildItem().getParentItem().getItemName())
+                                        .quantity(orderItem.getQuantity())
+                                        .itemWeightsAndPrices(ItemWeightsAndPrices.builder()
+                                                .quantity(orderItem.getItemWeightsAndPrices().getQuantity())
+                                                .itemPrice(orderItem.getItemWeightsAndPrices().getItemPrice())
+                                                .quantityUnit(ItemDetailsResponse.LookupUnits.builder()
+                                                        .unitLookupValue(orderItem.getItemWeightsAndPrices().getQuantityUnit().getLookupValue())
+                                                        .unitLookupCode(orderItem.getItemWeightsAndPrices().getQuantityUnit().getLookupValueCode())
+                                                        .build())
+                                                .build())
                                         .build()).collect(Collectors.toList()))
                         .orderStatus(order.getOrderStatusId().getLookupValue())
                         .customerName(customer.getFirstName()+", "+customer.getLastName())
@@ -132,36 +151,65 @@ public class OrderService {
     public List<OrderResponse> getCreatedOrdersForRestaurant(){
         User restaurant = getCurrentLoggedUserDetails();
         List<Order> orders = orderRepository.findByRestaurantId(restaurant);
-        return orders.stream().map(order ->
-                OrderResponse.builder()
-                        .orderId("ORDER-"+order.getOrderId())
-                        .orderItems(orderItemsRepository.findByOrderId(order)
-                                .stream().map(orderItem -> OrderItemResponse.builder()
-                                        .build()).collect(Collectors.toList()))
-                        .orderStatus(order.getOrderStatusId().getLookupValue())
-                        .customerName(order.getCustomerId().getFirstName()+", "+order.getCustomerId().getLastName())
-                        .restaurantName(order.getRestaurantId().getRestaurantProfile().getRestaurantName())
-                        .dietitianName(order.getDietitianId()!=null  ? order.getDietitianId().getFirstName()+", "+order.getDietitianId().getLastName() : null)
-                        .orderTotalPrice(order.getOrderTotalPrice())
-                        .deliveryAddress(order.getDeliveryAddress())
-                        .build()
+        return orders.stream().map(order -> OrderResponse.builder()
+                .orderId("ORDER-" + order.getOrderId())
+                .orderItems(orderItemsRepository.findByOrderId(order)
+                        .stream().map(orderItem -> OrderItemResponse.builder()
+                                .childItemName(orderItem.getChildItem().getItemName())
+                                .parentItemName(orderItem.getChildItem().getParentItem().getItemName())
+                                .quantity(orderItem.getQuantity())
+                                .itemWeightsAndPrices(ItemWeightsAndPrices.builder()
+                                        .quantity(orderItem.getItemWeightsAndPrices().getQuantity())
+                                        .itemPrice(orderItem.getItemWeightsAndPrices().getItemPrice())
+                                        .quantityUnit(ItemDetailsResponse.LookupUnits.builder()
+                                                .unitLookupValue(orderItem.getItemWeightsAndPrices().getQuantityUnit().getLookupValue())
+                                                .unitLookupCode(orderItem.getItemWeightsAndPrices().getQuantityUnit().getLookupValueCode())
+                                                .build())
+                                        .build())
+                                .build()).collect(Collectors.toList()))
+                .orderStatus(order.getOrderStatusId().getLookupValue())
+                .customerName(order.getCustomerId().getFirstName() + ", " + order.getCustomerId().getLastName())
+                .restaurantName(order.getRestaurantId().getRestaurantProfile().getRestaurantName())
+                .dietitianName(order.getDietitianId() != null ? order.getDietitianId().getFirstName() + ", " + order.getDietitianId().getLastName() : null)
+                .orderTotalPrice(order.getOrderTotalPrice())
+                .deliveryAddress(order.getDeliveryAddress())
+                .build()
         ).collect(Collectors.toList());
     }
 
-    public ItemDetailsResponse.LookupUnits getNextOrderStatus(String orderStatus){
+    public ItemDetailsResponse.LookupUnits getNextOrderStatus(String orderId){
+        Long orderIdVal = Long.parseLong(orderId.replace("ORDER-",""));
+        Order order = orderRepository.findById(orderIdVal).get();
         List<LookupValue> lookupValues = lookupRepository.findByLookupValueType(ORDER_STATUS_TYPE.getValue());
-        LookupValue currentLookupValue = lookupRepository.findByLookupValueCode(orderStatus);
+        LookupValue currentLookupValue = order.getOrderStatusId();
 
         LookupValue resultLookup = null;
         for (LookupValue lookupValue:lookupValues) {
             if(currentLookupValue.getLookupValueId()<lookupValue.getLookupValueId()
-             && ((resultLookup == null) || (resultLookup!=null && resultLookup.getLookupValueId()>lookupValue.getLookupValueId()))){
+                    && ((resultLookup == null) || (resultLookup!=null && resultLookup.getLookupValueId()>lookupValue.getLookupValueId()))){
                 resultLookup = lookupValue;
             }
         }
         return ItemDetailsResponse.LookupUnits.builder()
                 .unitLookupCode(resultLookup.getLookupValueCode())
                 .unitLookupValue(resultLookup.getLookupValue()).build();
+    }
+
+    public void setOrderStatus(String orderId){
+        Long orderIdVal = Long.parseLong(orderId.replace("ORDER-",""));
+        Order order = orderRepository.findById(orderIdVal).get();
+        List<LookupValue> lookupValues = lookupRepository.findByLookupValueType(ORDER_STATUS_TYPE.getValue());
+        LookupValue currentLookupValue = order.getOrderStatusId();
+
+        LookupValue resultLookup = null;
+        for (LookupValue lookupValue:lookupValues) {
+            if(currentLookupValue.getLookupValueId()<lookupValue.getLookupValueId()
+                    && ((resultLookup == null) || (resultLookup!=null && resultLookup.getLookupValueId()>lookupValue.getLookupValueId()))){
+                resultLookup = lookupValue;
+            }
+        }
+        order.setOrderStatusId(resultLookup);
+        orderRepository.save(order);
     }
 
     public void updateCreatedOrdersForRestaurant(OrderResponse orderRequest){
