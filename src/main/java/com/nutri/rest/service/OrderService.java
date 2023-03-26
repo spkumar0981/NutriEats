@@ -7,8 +7,6 @@ import com.nutri.rest.request.RecurringOrderRequest;
 import com.nutri.rest.response.*;
 import com.nutri.rest.utils.*;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.*;
@@ -33,8 +31,9 @@ public class OrderService {
     private final ParentItemRepository parentItemRepository;
     private final RecurringOrderRepository recurringOrderRepository;
     private final SubscriptionRepository subscriptionRepository;
+    private final MailService mailService;
 
-    public OrderService(OrderRepository orderRepository, OrderItemsRepository orderItemsRepository, UserRepository userRepository, ChildItemRepository childItemRepository, RestaurantItemsRepository restaurantItemsRepository, RestaurantItemWeightsAndPricesRepository itemWeightsAndPricesRepository, LookupRepository lookupRepository, MenuItemRepository menuItemRepository, ParentItemRepository parentItemRepository, RecurringOrderRepository recurringOrderRepository, SubscriptionRepository subscriptionRepository) {
+    public OrderService(OrderRepository orderRepository, OrderItemsRepository orderItemsRepository, UserRepository userRepository, ChildItemRepository childItemRepository, RestaurantItemsRepository restaurantItemsRepository, RestaurantItemWeightsAndPricesRepository itemWeightsAndPricesRepository, LookupRepository lookupRepository, MenuItemRepository menuItemRepository, ParentItemRepository parentItemRepository, RecurringOrderRepository recurringOrderRepository, SubscriptionRepository subscriptionRepository, MailService mailService) {
         this.orderRepository = orderRepository;
         this.orderItemsRepository = orderItemsRepository;
         this.userRepository = userRepository;
@@ -46,6 +45,7 @@ public class OrderService {
         this.parentItemRepository = parentItemRepository;
         this.recurringOrderRepository = recurringOrderRepository;
         this.subscriptionRepository = subscriptionRepository;
+        this.mailService = mailService;
     }
 
     public OrderResponse createOrder(List<OrderRequest> orderRequestList, String restaurantUserName, String deliveryAddress){
@@ -326,6 +326,10 @@ public class OrderService {
         }
         order.setOrderStatusId(resultLookup);
         orderRepository.save(order);
+        if(ORDER_STATUS_2.name().equals(resultLookup.getLookupValueCode()))
+            mailService.sendOrderConfirmationMailToCustomer(order.getCustomerId().getUserName(), order.getCustomerId().getFirstName(), order.getRestaurantId().getRestaurantProfile().getRestaurantName(), orderIdVal.toString());
+        if(ORDER_STATUS_6.name().equals(resultLookup.getLookupValueCode()))
+            mailService.sendOrderDeliveredMailToCustomer(order.getCustomerId().getUserName(), order.getCustomerId().getFirstName(), order.getRestaurantId().getRestaurantProfile().getRestaurantName(), orderIdVal.toString());
     }
 
     public void updateCreatedOrdersForRestaurant(OrderResponse orderRequest){
