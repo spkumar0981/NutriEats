@@ -7,6 +7,8 @@ import com.nutri.rest.request.RecurringOrderRequest;
 import com.nutri.rest.response.*;
 import com.nutri.rest.utils.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.*;
@@ -129,6 +131,40 @@ public class OrderService {
                 .dietitianName(order.getDietitianId()!=null  ? order.getDietitianId().getFirstName()+", "+order.getDietitianId().getLastName() : null)
                 .orderTotalPrice(order.getOrderTotalPrice())
                 .build();
+    }
+
+    public List<OrderResponse> getNewlyCreatedOrdersForCustomer(){
+        User customer = getCurrentLoggedUserDetails();
+        LookupValue orderStatus = lookupRepository.findByLookupValueCode(ORDER_STATUS_6.name());
+        List<Order> orders = orderRepository.findByCustomerIdAndOrderStatusIdNot(customer, orderStatus);
+        return orders.stream().map(order ->
+                OrderResponse.builder()
+                        .orderId("ORDER-"+order.getOrderId())
+                        .orderItems(orderItemsRepository.findByOrderId(order)
+                                .stream().map(orderItem -> OrderItemResponse.builder()
+                                        .childItemName(orderItem.getChildItem().getItemName())
+                                        .parentItemName(orderItem.getChildItem().getParentItem().getItemName())
+                                        .quantity(orderItem.getRecurringOrderId()==null ? orderItem.getQuantity() : 1)
+                                        .itemWeightsAndPrices(ItemWeightsAndPrices.builder()
+                                                .quantity(orderItem.getRecurringOrderId()==null ? orderItem.getItemWeightsAndPrices().getQuantity() :
+                                                        orderItem.getRecurringOrderId().getMenuItemId().getQuantity())
+                                                .itemPrice(orderItem.getRecurringOrderId()==null ? orderItem.getItemWeightsAndPrices().getItemPrice() : null)
+                                                .quantityUnit(ItemDetailsResponse.LookupUnits.builder()
+                                                        .unitLookupValue(orderItem.getRecurringOrderId()==null ? orderItem.getItemWeightsAndPrices().getQuantityUnit().getLookupValue()
+                                                                : orderItem.getRecurringOrderId().getMenuItemId().getQuantityUnit().getLookupValue())
+                                                        .unitLookupCode(orderItem.getRecurringOrderId()==null ? orderItem.getItemWeightsAndPrices().getQuantityUnit().getLookupValueCode()
+                                                                : orderItem.getRecurringOrderId().getMenuItemId().getQuantityUnit().getLookupValueCode())
+                                                        .build())
+                                                .build())
+                                        .build()).collect(Collectors.toList()))
+                        .orderStatus(order.getOrderStatusId().getLookupValue())
+                        .customerName(order.getCustomerId().getFirstName() + ", " + order.getCustomerId().getLastName())
+                        .restaurantName(order.getRestaurantId().getRestaurantProfile().getRestaurantName())
+                        .dietitianName(order.getDietitianId() != null ? order.getDietitianId().getFirstName() + ", " + order.getDietitianId().getLastName() : null)
+                        .orderTotalPrice(order.getOrderTotalPrice())
+                        .deliveryAddress(order.getDeliveryAddress())
+                        .build()
+        ).collect(Collectors.toList());
     }
 
     public List<OrderResponse> getCreatedOrdersForCustomer(){

@@ -4,6 +4,8 @@ import com.nutri.rest.model.LookupValue;
 import com.nutri.rest.model.Order;
 import com.nutri.rest.model.User;
 import org.aspectj.weaver.ast.Or;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -14,6 +16,8 @@ import java.util.List;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
+    List<Order> findByCustomerIdAndOrderStatusIdNot(User customer, LookupValue orderStatusId);
+
     List<Order> findByCustomerId(User customer);
     List<Order> findByRestaurantId(User restaurant);
     List<Order> findByRestaurantIdAndOrderStatusIdNot(User customer, LookupValue orderStatusId);

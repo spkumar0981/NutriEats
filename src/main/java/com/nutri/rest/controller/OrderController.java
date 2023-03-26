@@ -9,6 +9,8 @@ import com.nutri.rest.response.RecurringOrderResponse;
 import com.nutri.rest.service.OrderService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -61,6 +63,12 @@ public class OrderController {
     @ApiOperation(value = "Get all customer orders")
     public List<OrderResponse> getAllCustomerOrders(){
         return orderService.getCreatedOrdersForCustomer();
+    }
+
+    @GetMapping("/customer/new/orders")
+    @ApiOperation(value = "Get all customer orders")
+    public List<OrderResponse> getAllCustomerOrdersNotDelivered(){
+        return orderService.getNewlyCreatedOrdersForCustomer();
     }
 
     @GetMapping("/customer/{customerUserName}")
