@@ -5,6 +5,7 @@ import com.nutri.rest.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 
 public interface RecurringOrderRepository extends JpaRepository<RecurringOrders, Long> {
@@ -12,6 +13,8 @@ public interface RecurringOrderRepository extends JpaRepository<RecurringOrders,
     Long maxOrderNumber();
 
     List<RecurringOrders> findByRestaurantId(User restaurant);
+
+    List<RecurringOrders> findByRestaurantIdAndFromDateGreaterThanEqualAndToDateLessThanEqual(User restaurant, ZonedDateTime fromDate, ZonedDateTime toDate);
 
     List<RecurringOrders> findByRestaurantIdAndOrderNumber(User restaurant, Long orderNumber);
 

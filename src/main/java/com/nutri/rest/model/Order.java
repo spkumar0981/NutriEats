@@ -4,6 +4,9 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.util.Date;
 
 @Entity
 @Builder
@@ -33,6 +36,8 @@ public class Order {
     private LookupValue orderStatusId;
 
     private BigDecimal orderTotalPrice;
+
+    private LocalDateTime orderDate;
 
     private String deliveryAddress;
 }

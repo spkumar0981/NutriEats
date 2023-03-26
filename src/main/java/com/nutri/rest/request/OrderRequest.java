@@ -13,4 +13,5 @@ public class OrderRequest {
     private String childItemName;
     private ItemWeightsAndPrices itemWeightsAndPrices;
     private Long quantity;
+    private String recurringOrderId;
 }

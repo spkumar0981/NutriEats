@@ -1,7 +1,6 @@
 package com.nutri.rest.model;
 
 import lombok.*;
-
 import javax.persistence.*;
 
 @Entity
@@ -25,4 +24,8 @@ public class OrderItems {
     @ManyToOne
     @JoinColumn(referencedColumnName = "restaurantWeightItemId", name = "itemWeightsAndPricesId")
     private RestaurantItemWeightsAndPrices itemWeightsAndPrices;
+
+    @ManyToOne
+    @JoinColumn(referencedColumnName = "orderId", name = "recurringOrderId")
+    private RecurringOrders recurringOrderId;
 }

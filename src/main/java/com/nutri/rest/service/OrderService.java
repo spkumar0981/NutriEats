@@ -9,10 +9,8 @@ import com.nutri.rest.utils.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.*;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.nutri.rest.utils.LookupTypes.ORDER_STATUS_TYPE;
@@ -57,6 +55,7 @@ public class OrderService {
                 .customerId(customer)
                 .restaurantId(restaurant)
                 .deliveryAddress(deliveryAddress)
+                .orderDate(LocalDateTime.now())
                 .build();
         Order finalOrder = orderRepository.save(order);
 
@@ -67,11 +66,56 @@ public class OrderService {
             RestaurantItemWeightsAndPrices itemWeightsAndPrices = itemWeightsAndPricesRepository
                     .findByRestaurantItemIdAndQuantityAndQuantityUnit(restaurantItem, request.getItemWeightsAndPrices().getQuantity(),
                             lookupValue);
+            Optional<RecurringOrders> recurringOrders = recurringOrderRepository.findById(Long.parseLong(request.getRecurringOrderId().replace("ORDER-","")));
             return OrderItems.builder()
                     .orderId(finalOrder)
                     .childItem(childItem)
                     .quantity(request.getQuantity())
-                    .itemWeightsAndPrices(itemWeightsAndPrices).build();
+                    .itemWeightsAndPrices(itemWeightsAndPrices)
+                    .recurringOrderId(recurringOrders.isPresent() ? recurringOrders.get() : null)
+                    .build();
+        }).collect(Collectors.toList());
+
+        List<OrderItemResponse> orderResponseList = orderItemsRepository.saveAll(orderItemsList).stream().map(orderItem ->
+                OrderItemResponse.builder().build()).collect(Collectors.toList());
+        return OrderResponse.builder()
+                .orderId("ORDER-"+order.getOrderId())
+                .orderItems(orderResponseList)
+                .orderStatus(order.getOrderStatusId().getLookupValue())
+                .customerName(customer.getFirstName()+", "+customer.getLastName())
+                .restaurantName(order.getRestaurantId().getRestaurantProfile().getRestaurantName())
+                .dietitianName(order.getDietitianId()!=null  ? order.getDietitianId().getFirstName()+", "+order.getDietitianId().getLastName() : null)
+                .orderTotalPrice(order.getOrderTotalPrice())
+                .build();
+    }
+
+    public OrderResponse createOrderForCustomerByRestaurant(List<OrderRequest> orderRequestList){
+        RecurringOrders recOrder = recurringOrderRepository.findById(
+                Long.parseLong(orderRequestList.get(0).getRecurringOrderId().replace("ORDER-",""))).get();
+        User restaurant = recOrder.getRestaurantId();
+        User customer = recOrder.getMenuItemId().getSubscriptionId().getCustomerId();
+        User dietitian = recOrder.getMenuItemId().getSubscriptionId().getDietitianId();
+
+        Order order = Order.builder()
+                .orderStatusId(lookupRepository.findByLookupValueCode(OrderStatus.ORDER_STATUS_1.name()))
+                .customerId(customer)
+                .restaurantId(restaurant)
+                .dietitianId(dietitian)
+                .deliveryAddress(recOrder.getDeliveryAddress())
+                .orderDate(LocalDateTime.now())
+                .build();
+        Order finalOrder = orderRepository.save(order);
+
+        List<OrderItems> orderItemsList = orderRequestList.stream().map(request -> {
+            ChildItem childItem = childItemRepository.findByItemName(request.getChildItemName());
+
+            Optional<RecurringOrders> recurringOrders = recurringOrderRepository.findById(Long.parseLong(request.getRecurringOrderId().replace("ORDER-","")));
+            return OrderItems.builder()
+                    .orderId(finalOrder)
+                    .childItem(childItem)
+                    .quantity(request.getQuantity())
+                    .recurringOrderId(recurringOrders.isPresent() ? recurringOrders.get() : null)
+                    .build();
         }).collect(Collectors.toList());
 
         List<OrderItemResponse> orderResponseList = orderItemsRepository.saveAll(orderItemsList).stream().map(orderItem ->
@@ -97,20 +141,23 @@ public class OrderService {
                                 .stream().map(orderItem -> OrderItemResponse.builder()
                                         .childItemName(orderItem.getChildItem().getItemName())
                                         .parentItemName(orderItem.getChildItem().getParentItem().getItemName())
-                                        .quantity(orderItem.getQuantity())
+                                        .quantity(orderItem.getRecurringOrderId()==null ? orderItem.getQuantity() : 1)
                                         .itemWeightsAndPrices(ItemWeightsAndPrices.builder()
-                                                .quantity(orderItem.getItemWeightsAndPrices().getQuantity())
-                                                .itemPrice(orderItem.getItemWeightsAndPrices().getItemPrice())
+                                                .quantity(orderItem.getRecurringOrderId()==null ? orderItem.getItemWeightsAndPrices().getQuantity() :
+                                                        orderItem.getRecurringOrderId().getMenuItemId().getQuantity())
+                                                .itemPrice(orderItem.getRecurringOrderId()==null ? orderItem.getItemWeightsAndPrices().getItemPrice() : null)
                                                 .quantityUnit(ItemDetailsResponse.LookupUnits.builder()
-                                                        .unitLookupValue(orderItem.getItemWeightsAndPrices().getQuantityUnit().getLookupValue())
-                                                        .unitLookupCode(orderItem.getItemWeightsAndPrices().getQuantityUnit().getLookupValueCode())
+                                                        .unitLookupValue(orderItem.getRecurringOrderId()==null ? orderItem.getItemWeightsAndPrices().getQuantityUnit().getLookupValue()
+                                                                : orderItem.getRecurringOrderId().getMenuItemId().getQuantityUnit().getLookupValue())
+                                                        .unitLookupCode(orderItem.getRecurringOrderId()==null ? orderItem.getItemWeightsAndPrices().getQuantityUnit().getLookupValueCode()
+                                                                : orderItem.getRecurringOrderId().getMenuItemId().getQuantityUnit().getLookupValueCode())
                                                         .build())
                                                 .build())
                                         .build()).collect(Collectors.toList()))
                         .orderStatus(order.getOrderStatusId().getLookupValue())
-                        .customerName(customer.getFirstName()+", "+customer.getLastName())
+                        .customerName(order.getCustomerId().getFirstName() + ", " + order.getCustomerId().getLastName())
                         .restaurantName(order.getRestaurantId().getRestaurantProfile().getRestaurantName())
-                        .dietitianName(order.getDietitianId()!=null  ? order.getDietitianId().getFirstName()+", "+order.getDietitianId().getLastName() : null)
+                        .dietitianName(order.getDietitianId() != null ? order.getDietitianId().getFirstName() + ", " + order.getDietitianId().getLastName() : null)
                         .orderTotalPrice(order.getOrderTotalPrice())
                         .deliveryAddress(order.getDeliveryAddress())
                         .build()
@@ -164,6 +211,39 @@ public class OrderService {
                                         .quantityUnit(ItemDetailsResponse.LookupUnits.builder()
                                                 .unitLookupValue(orderItem.getItemWeightsAndPrices().getQuantityUnit().getLookupValue())
                                                 .unitLookupCode(orderItem.getItemWeightsAndPrices().getQuantityUnit().getLookupValueCode())
+                                                .build())
+                                        .build())
+                                .build()).collect(Collectors.toList()))
+                .orderStatus(order.getOrderStatusId().getLookupValue())
+                .customerName(order.getCustomerId().getFirstName() + ", " + order.getCustomerId().getLastName())
+                .restaurantName(order.getRestaurantId().getRestaurantProfile().getRestaurantName())
+                .dietitianName(order.getDietitianId() != null ? order.getDietitianId().getFirstName() + ", " + order.getDietitianId().getLastName() : null)
+                .orderTotalPrice(order.getOrderTotalPrice())
+                .deliveryAddress(order.getDeliveryAddress())
+                .build()
+        ).collect(Collectors.toList());
+    }
+
+    public List<OrderResponse> getLiveCreatedOrdersForRestaurant(){
+        User restaurant = getCurrentLoggedUserDetails();
+        List<Order> orders = orderRepository.findByRestaurantIdAndOrderStatusIdNot(restaurant, lookupRepository.findByLookupValueCode(OrderStatus.ORDER_STATUS_6.name()));
+
+        return orders.stream().map(order -> OrderResponse.builder()
+                .orderId("ORDER-" + order.getOrderId())
+                .orderItems(orderItemsRepository.findByOrderId(order)
+                        .stream().map(orderItem -> OrderItemResponse.builder()
+                                .childItemName(orderItem.getChildItem().getItemName())
+                                .parentItemName(orderItem.getChildItem().getParentItem().getItemName())
+                                .quantity(orderItem.getRecurringOrderId()==null ? orderItem.getQuantity() : 1)
+                                .itemWeightsAndPrices(ItemWeightsAndPrices.builder()
+                                        .quantity(orderItem.getRecurringOrderId()==null ? orderItem.getItemWeightsAndPrices().getQuantity() :
+                                                orderItem.getRecurringOrderId().getMenuItemId().getQuantity())
+                                        .itemPrice(orderItem.getRecurringOrderId()==null ? orderItem.getItemWeightsAndPrices().getItemPrice() : null)
+                                        .quantityUnit(ItemDetailsResponse.LookupUnits.builder()
+                                                .unitLookupValue(orderItem.getRecurringOrderId()==null ? orderItem.getItemWeightsAndPrices().getQuantityUnit().getLookupValue()
+                                                        : orderItem.getRecurringOrderId().getMenuItemId().getQuantityUnit().getLookupValue())
+                                                .unitLookupCode(orderItem.getRecurringOrderId()==null ? orderItem.getItemWeightsAndPrices().getQuantityUnit().getLookupValueCode()
+                                                : orderItem.getRecurringOrderId().getMenuItemId().getQuantityUnit().getLookupValueCode())
                                                 .build())
                                         .build())
                                 .build()).collect(Collectors.toList()))
@@ -309,6 +389,39 @@ public class OrderService {
                     .deliveryTime(recurringOrder.getOrderDeliveryTime())
                     .price(recurringOrder.getOrderTotalPrice())
                     .build());
+        });
+        return recurringOrderResponses;
+    }
+
+    public List<RecurringOrderResponse> getPendingRecurringOrdersForTheDay(){
+        User restaurant = getCurrentLoggedUserDetails();
+        List<RecurringOrders> recurringOrders = recurringOrderRepository.findByRestaurantIdAndFromDateGreaterThanEqualAndToDateLessThanEqual(restaurant, LocalDate.now(ZoneId.systemDefault()).atStartOfDay(ZoneId.systemDefault()), LocalDate.now(ZoneId.systemDefault()).atStartOfDay(ZoneId.systemDefault()));
+        Map<String, Integer> duplicates = new HashMap<>();
+        List<RecurringOrderResponse> recurringOrderResponses = new ArrayList<>();
+
+        recurringOrders.forEach(recurringOrder -> {
+            Order order = orderRepository.findIfOrderCreatedForTheDay(restaurant.getId(), recurringOrder.getOrderId(),
+                    LocalDate.now().atStartOfDay(), LocalDateTime.now().with(LocalTime.MAX));
+            if(order==null) {
+                String key = recurringOrder.getOrderNumber() + "" + recurringOrder.getRestaurantId().getId() + ""
+                        + recurringOrder.getMenuItemId().getSubscriptionId().getCustomerId().getId() + ""
+                        + recurringOrder.getMenuItemId().getSubscriptionId().getDietitianId().getId();
+
+                if (!duplicates.containsKey(key)) {
+                    recurringOrderResponses.add(RecurringOrderResponse.builder()
+                            .orderId("REC-ORDER-" + recurringOrder.getOrderNumber())
+                            .restaurantName(recurringOrder.getRestaurantId().getRestaurantProfile().getRestaurantName())
+                            .customerName(recurringOrder.getMenuItemId().getSubscriptionId().getCustomerId().getFirstName() + ", "
+                                    + recurringOrder.getMenuItemId().getSubscriptionId().getCustomerId().getLastName())
+                            .customerAddress(recurringOrder.getDeliveryAddress())
+                            .dietitianName(recurringOrder.getMenuItemId().getSubscriptionId().getDietitianId().getFirstName() + ", "
+                                    + recurringOrder.getMenuItemId().getSubscriptionId().getDietitianId().getLastName())
+                            .orderStatus(lookupRepository.findByLookupValueCode(recurringOrder.getOrderStatus().getLookupValueCode()).getLookupValue())
+                            .orderStatusCode(recurringOrder.getOrderStatus().getLookupValueCode())
+                            .build());
+                    duplicates.put(key, 1);
+                }
+            }
         });
         return recurringOrderResponses;
     }

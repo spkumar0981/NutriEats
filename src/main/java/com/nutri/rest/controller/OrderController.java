@@ -31,6 +31,12 @@ public class OrderController {
         return orderService.getCreatedOrdersForRestaurant();
     }
 
+    @GetMapping("/restaurant/live")
+    @ApiOperation(value = "Get all restaurant orders")
+    public List<OrderResponse> getAllRestaurantLiveOrders(){
+        return orderService.getLiveCreatedOrdersForRestaurant();
+    }
+
     @GetMapping("/restaurant/status")
     @ApiOperation(value = "Get next status for restaurant")
     public ItemDetailsResponse.LookupUnits getNextOrderStatus(@RequestParam String orderId){
@@ -38,7 +44,7 @@ public class OrderController {
     }
 
     @PostMapping("/restaurant/status")
-    @ApiOperation(value = "Get next status for restaurant")
+    @ApiOperation(value = "Update next status for restaurant")
     public ResponseEntity<Object> setNextOrderStatus(@RequestParam String orderId){
         orderService.setOrderStatus(orderId);
         return new ResponseEntity<>("Completed", HttpStatus.OK);
@@ -73,6 +79,12 @@ public class OrderController {
     @ApiOperation(value = "Create customer orders")
     public OrderResponse createOrderForCustomer(@RequestParam String restaurantUserName, @RequestParam String deliveryAddress, @RequestBody List<OrderRequest> orderRequestList){
         return orderService.createOrder(orderRequestList, restaurantUserName, deliveryAddress);
+    }
+
+    @PostMapping("/customer/restaurant")
+    @ApiOperation(value = "Create customer orders by restaurant(used in case of recurring)")
+    public OrderResponse createOrderForCustomerByRestaurant(@RequestBody List<OrderRequest> orderRequestList){
+        return orderService.createOrderForCustomerByRestaurant(orderRequestList);
     }
 
     @PostMapping("/recurring")
@@ -124,5 +136,11 @@ public class OrderController {
     public ResponseEntity<Object> updateRecurringOrderForCustomerByDietitian(@RequestParam String orderId){
         orderService.updateNewRecurringOrdersByDietitian(orderId);
         return new ResponseEntity<>("Completed", HttpStatus.OK);
+    }
+
+    @GetMapping("/recurring/pending/order")
+    @ApiOperation(value = "Get pending recurring orders for which order needs to be created for the day for customer")
+    public List<RecurringOrderResponse> getPendingRecurringOrdersForTheDay(){
+        return orderService.getPendingRecurringOrdersForTheDay();
     }
 }
