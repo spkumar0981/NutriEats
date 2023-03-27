@@ -109,7 +109,7 @@ public class SubscriptionService {
                 .customerInput(dietitianRequest.getCustomerInput())
                 .subscriptionExpireDate(LocalDate.now().plusWeeks(1))
                 .preferredMealOption(preferredMealOption)
-                .allergens(Stream.of(dietitianRequest.getAllergens()).collect(Collectors.joining(",")))
+                .allergens(dietitianRequest.getAllergens().stream().collect(Collectors.joining(",")))
                 .build();
         subscriptionRepository.save(subscription);
         return "Dietitian hired successfully";
