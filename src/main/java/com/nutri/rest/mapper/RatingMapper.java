@@ -13,6 +13,7 @@ public class RatingMapper {
         return RatingResponse
                 .builder()
                 .username(rating.getFromUserId().getUserName())
+                .fullName(rating.getFromUserId().getFirstName()+", "+rating.getFromUserId().getLastName())
                 .rating(rating.getRating())
                 .commentCategory(LookupMapper.mapToLookups(rating.getCommentCategory()))
                 .comments(rating.getComments())

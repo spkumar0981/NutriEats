@@ -14,6 +14,8 @@ public class RatingResponse {
 
     private String username;
 
+    private String fullName;
+
     private Long rating;
 
     private ItemDetailsResponse.LookupUnits commentCategory; //consulted for ??
