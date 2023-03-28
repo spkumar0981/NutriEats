@@ -68,13 +68,13 @@ public class OrderService {
             RestaurantItemWeightsAndPrices itemWeightsAndPrices = itemWeightsAndPricesRepository
                     .findByRestaurantItemIdAndQuantityAndQuantityUnit(restaurantItem, request.getItemWeightsAndPrices().getQuantity(),
                             lookupValue);
-            Optional<RecurringOrders> recurringOrders = recurringOrderRepository.findById(Long.parseLong(request.getRecurringOrderId().replace("ORDER-","")));
+            Optional<RecurringOrders> recurringOrders = recurringOrderRepository.findById(request.getRecurringOrderId() !=null ? Long.parseLong(request.getRecurringOrderId().replace("ORDER-","")) : -1);
             return OrderItems.builder()
                     .orderId(finalOrder)
                     .childItem(childItem)
                     .quantity(request.getQuantity())
                     .itemWeightsAndPrices(itemWeightsAndPrices)
-                    .recurringOrderId(recurringOrders.isPresent() ? recurringOrders.get() : null)
+                    .recurringOrderId(recurringOrders !=null ? recurringOrders.isPresent() ? recurringOrders.get() : null : null)
                     .build();
         }).collect(Collectors.toList());
 
