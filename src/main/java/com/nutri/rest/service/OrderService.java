@@ -435,14 +435,14 @@ public class OrderService {
 
     public List<RecurringOrderResponse> getPendingRecurringOrdersForTheDay(){
         User restaurant = getCurrentLoggedUserDetails();
-        List<RecurringOrders> recurringOrders = recurringOrderRepository.findByRestaurantIdAndFromDateGreaterThanEqualAndToDateLessThanEqual(restaurant, LocalDate.now(ZoneId.systemDefault()).atStartOfDay(ZoneId.systemDefault()), LocalDate.now(ZoneId.systemDefault()).atStartOfDay(ZoneId.systemDefault()));
+        List<RecurringOrders> recurringOrders = recurringOrderRepository.findByRestaurantIdAndFromDateLessThanEqualAndToDateGreaterThanEqual(restaurant, LocalDate.now(ZoneId.systemDefault()).atStartOfDay(ZoneId.systemDefault()), LocalDate.now(ZoneId.systemDefault()).plusDays(1).atStartOfDay(ZoneId.systemDefault()));
         Map<String, Integer> duplicates = new HashMap<>();
         List<RecurringOrderResponse> recurringOrderResponses = new ArrayList<>();
 
         recurringOrders.forEach(recurringOrder -> {
-            Order order = orderRepository.findIfOrderCreatedForTheDay(restaurant.getId(), recurringOrder.getOrderId(),
+            Long order = orderRepository.findIfOrderCreatedForTheDay(restaurant.getId(), recurringOrder.getOrderId(),
                     LocalDate.now().atStartOfDay(), LocalDateTime.now().with(LocalTime.MAX));
-            if(order==null) {
+            if(order==null || order==0) {
                 String key = recurringOrder.getOrderNumber() + "" + recurringOrder.getRestaurantId().getId() + ""
                         + recurringOrder.getMenuItemId().getSubscriptionId().getCustomerId().getId() + ""
                         + recurringOrder.getMenuItemId().getSubscriptionId().getDietitianId().getId();

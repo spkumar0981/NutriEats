@@ -14,7 +14,7 @@ public interface RecurringOrderRepository extends JpaRepository<RecurringOrders,
 
     List<RecurringOrders> findByRestaurantId(User restaurant);
 
-    List<RecurringOrders> findByRestaurantIdAndFromDateGreaterThanEqualAndToDateLessThanEqual(User restaurant, ZonedDateTime fromDate, ZonedDateTime toDate);
+    List<RecurringOrders> findByRestaurantIdAndFromDateLessThanEqualAndToDateGreaterThanEqual(User restaurant, ZonedDateTime fromDate, ZonedDateTime toDate);
 
     List<RecurringOrders> findByRestaurantIdAndOrderNumber(User restaurant, Long orderNumber);
 

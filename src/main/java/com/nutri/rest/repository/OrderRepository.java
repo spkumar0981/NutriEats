@@ -26,5 +26,5 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query(value = "SELECT COUNT(*) FROM ORDERS ORD " +
             "INNER JOIN ORDER_ITEMS OI ON (OI.ORDER_ID=ORD.ORDER_ID) " +
             "WHERE ORD.RESTAURANT_ID=?1 AND OI.RECURRING_ORDER_ID=?2 AND ORD.ORDER_DATE>=?3 AND ORD.ORDER_DATE<=?4", nativeQuery = true)
-    Order findIfOrderCreatedForTheDay(Long restaurantId, Long orderId, LocalDateTime orderDate1, LocalDateTime orderDate2);
+    Long findIfOrderCreatedForTheDay(Long restaurantId, Long orderId, LocalDateTime orderDate1, LocalDateTime orderDate2);
 }
