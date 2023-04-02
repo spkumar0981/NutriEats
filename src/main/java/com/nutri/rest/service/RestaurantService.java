@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -131,7 +132,7 @@ public class RestaurantService {
                     .availableToTime(item.getAvailableToTime())
                     .itemDescription(item.getItemDescription())
                     .isActive(item.getIsActive())
-                    .itemImage(item.getItemImage())
+                    .itemImage(new String(item.getItemImage(), StandardCharsets.UTF_8))
                     .itemCategory(item.getChildItemId().getItemCategory())
                     .itemWeightsAndPrices(itemWeightsAndPrices)
                     .build());

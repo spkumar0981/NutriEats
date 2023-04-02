@@ -28,7 +28,7 @@ public class RestaurantItemsResponse {
         private String availableToTime;
         private String itemDescription;
         private String isActive;
-        private byte[] itemImage;
+        private String itemImage;
         private String itemCategory;
         private List<ItemWeightsAndPrices> itemWeightsAndPrices;
     }
