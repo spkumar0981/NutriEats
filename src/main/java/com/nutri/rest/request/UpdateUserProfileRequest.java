@@ -39,4 +39,6 @@ public class UpdateUserProfileRequest {
 
     private String restaurantName;
 
+    private String restaurantImage;
+
 }

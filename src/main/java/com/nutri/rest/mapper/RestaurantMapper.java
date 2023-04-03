@@ -27,6 +27,8 @@ public class RestaurantMapper {
                         .stream().map(lookupValue -> ItemDetailsResponse.LookupUnits.builder()
                                 .unitLookupCode(lookupValue.getLookupValueCode())
                                 .unitLookupValue(lookupValue.getLookupValue()).build()).collect(Collectors.toList()):null)
+                .restaurantImage(user.getRestaurantProfile()!=null ? user.getRestaurantProfile().getRestaurantImage()!=null ?
+                        new String(user.getRestaurantProfile().getRestaurantImage()) : null : null)
                 .build();
     }
 

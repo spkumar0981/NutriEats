@@ -357,6 +357,7 @@ public class UserService implements UserDetailsService {
     restaurantProfile.setBio(updateUserProfileRequest.getBio());
     restaurantProfile.setAddress(updateUserProfileRequest.getAddress());
     restaurantProfile.setAvgCost(updateUserProfileRequest.getAvgCost());
+    restaurantProfile.setRestaurantImage(updateUserProfileRequest.getRestaurantImage().getBytes());
 
     List<LookupValue> cuisines = updateUserProfileRequest.getCuisines().stream().map(cuisine ->
             lookupRepository.findByLookupValueCode(cuisine.getUnitLookupCode())).collect(Collectors.toList());

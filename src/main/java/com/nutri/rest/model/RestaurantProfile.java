@@ -24,6 +24,10 @@ public class RestaurantProfile {
     @Column(length = 5000)
     private String bio;
     private String address;
+
+    @Lob
+    private byte[] restaurantImage;
+
     @ManyToMany(cascade = CascadeType.DETACH)
     @LazyCollection(LazyCollectionOption.FALSE)
     @JoinTable(name = "RESTAURANT_CUISINES", joinColumns = @JoinColumn(name = "RESTAURANT_PROFILE_ID", referencedColumnName = "id"),

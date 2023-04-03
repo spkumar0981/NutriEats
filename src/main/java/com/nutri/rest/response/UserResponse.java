@@ -43,4 +43,6 @@ public class UserResponse {
     private String restaurantName;
 
     private String userProfileActivated;
+
+    private String restaurantImage;
 }

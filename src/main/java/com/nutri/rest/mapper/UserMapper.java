@@ -85,6 +85,8 @@ public class UserMapper {
             response.setCuisines(user.getRestaurantProfile().getCuisines().stream().map(lookupValue -> ItemDetailsResponse.LookupUnits.builder()
                     .unitLookupCode(lookupValue.getLookupValueCode())
                     .unitLookupValue(lookupValue.getLookupValue()).build()).collect(Collectors.toList()));
+            if(user.getRestaurantProfile().getRestaurantImage()!=null)
+                response.setRestaurantImage(new String(user.getRestaurantProfile().getRestaurantImage()));
         }
         return response;
     }

@@ -26,4 +26,6 @@ public class RestaurantListResponse {
 
     private Double rating;
 
+    private String restaurantImage;
+
 }
